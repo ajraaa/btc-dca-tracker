@@ -29,7 +29,7 @@ export default function SummaryCards({ totalModal, totalBtc, currentPrice, usdRa
   }
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
       <div className="bg-gray-800 p-5 rounded-xl border border-gray-700">
         <p className="text-gray-400 text-xs font-bold uppercase tracking-wider">Total Modal</p>
         <p className="text-xl font-bold mt-1">{formatValue(displayModal)}</p>
