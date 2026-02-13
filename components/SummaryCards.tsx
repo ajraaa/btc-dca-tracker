@@ -36,8 +36,8 @@ export default function SummaryCards({ totalModal, totalBtc, currentPrice, usdRa
       </div>
 
       <div className="bg-gray-800 p-5 rounded-xl border border-gray-700">
-        <p className="text-gray-400 text-[10px] font-bold uppercase tracking-widest">Aset BTC</p>
-        <p className="text-lg font-bold mt-1 text-orange-400 font-mono">
+        <p className="text-gray-400 text-xs font-bold uppercase tracking-wider">Aset BTC</p>
+        <p className="text-xl font-bold mt-1 text-orange-400">
           {totalBtc.toFixed(8)} <span className="text-[10px] text-gray-500">BTC</span>
         </p>
       </div>
