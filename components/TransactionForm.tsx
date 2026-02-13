@@ -39,8 +39,8 @@ export default function TransactionForm({ userId, onSuccess }: TransactionFormPr
       return
     }
 
-    if (btc <= 0) {
-      setErrorMsg("Jumlah BTC harus lebih besar dari 0")
+    if (btc <= 0.00000000) {
+      setErrorMsg("Jumlah BTC harus lebih besar dari 0.00000000")
       setLoading(false)
       return
     }
