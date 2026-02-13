@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "DCA BTC Tracker",
+  title: "BTC DCA Tracker",
   description: "Track your DCA.",
 };
 
