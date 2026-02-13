@@ -100,7 +100,15 @@ export default function TransactionForm({ userId, onSuccess }: TransactionFormPr
             type="date"
             value={date}
             max={today} // VALIDASI HTML: Mematikan pilihan tanggal masa depan di kalender
-            onChange={(e) => setDate(e.target.value)}
+            onChange={(e) => {
+              const selectedDate = e.target.value;
+              if (selectedDate > today) {
+                alert("Anda tidak bisa memilih tanggal masa depan!");
+                setDate(today); // Otomatis balikkan ke hari ini
+              } else {
+                setDate(selectedDate);
+              }
+            }}
             className="w-full p-2.5 rounded bg-gray-900 border border-gray-700 focus:border-orange-500 outline-none text-sm"
             required
           />

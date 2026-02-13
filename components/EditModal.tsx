@@ -101,7 +101,20 @@ export default function EditModal({ transaction, isOpen, onClose, onSuccess }: E
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1">Tanggal</label>
-              <input type="date" value={date} max={today} onChange={(e) => setDate(e.target.value)} className="w-full bg-gray-900 border border-gray-700 p-2 rounded text-sm outline-none focus:border-orange-500" />
+              <input 
+                type="date" 
+                value={date} 
+                max={today} 
+                onChange={(e) => {
+                  const selectedDate = e.target.value;
+                  if (selectedDate > today) {
+                    alert("Anda tidak bisa memilih tanggal masa depan!");
+                    setDate(today); // Otomatis balikkan ke hari ini
+                  } else {
+                    setDate(selectedDate);
+                  }
+                }} 
+                className="w-full bg-gray-900 border border-gray-700 p-2 rounded text-sm outline-none focus:border-orange-500" />
             </div>
             <div>
               <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1">Exchange</label>
