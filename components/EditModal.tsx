@@ -1,5 +1,5 @@
 'use client'
-import { useState } from 'react' // Hapus useEffect yang tidak terpakai
+import { useState } from 'react'
 import { supabase } from '@/lib/supabase'
 
 interface Transaction {
@@ -25,12 +25,43 @@ export default function EditModal({ transaction, isOpen, onClose, onSuccess }: E
   const [date, setDate] = useState(transaction.purchase_date.split('T')[0])
   const [exchange, setExchange] = useState(transaction.exchange_name || '')
   const [loading, setLoading] = useState(false)
+  const today = new Date().toLocaleDateString('en-CA');
+  const [errorMsg, setErrorMsg] = useState<string | null>(null)
 
   if (!isOpen) return null
 
   const handleUpdate = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
+    setErrorMsg(null)
+
+    const fiat = parseFloat(fiatAmount)
+    const btc = parseFloat(btcAmount)
+    const feeVal = parseFloat(fee)
+
+    if (date > today) {
+      setErrorMsg("Tanggal tidak boleh lebih dari hari ini")
+      setLoading(false)
+      return
+    }
+
+    if (fiat <= 0) {
+      setErrorMsg("Modal (IDR) harus lebih besar dari 0")
+      setLoading(false)
+      return
+    }
+
+    if (btc <= 0) {
+      setErrorMsg("Jumlah BTC harus lebih besar dari 0")
+      setLoading(false)
+      return
+    }
+
+    if (feeVal < 0) {
+      setErrorMsg("Biaya (Fee) tidak boleh negatif")
+      setLoading(false)
+      return
+    }
 
     const { error } = await supabase
       .from('transactions')
@@ -45,7 +76,7 @@ export default function EditModal({ transaction, isOpen, onClose, onSuccess }: E
 
     setLoading(false)
     if (error) {
-      alert('Gagal update: ' + error.message)
+      setErrorMsg('Gagal: ' + error.message)
     } else {
       onSuccess()
       onClose()
@@ -58,12 +89,19 @@ export default function EditModal({ transaction, isOpen, onClose, onSuccess }: E
         <h2 className="text-xl font-bold text-orange-500 mb-6 flex items-center gap-2">
           <span>✏️</span> Edit Transaksi
         </h2>
+
+      {/* TAMPILAN ERROR */}
+      {errorMsg && (
+        <div className="mb-4 p-3 bg-red-500/20 border border-red-500 text-red-400 text-xs rounded-lg animate-pulse">
+          ⚠️ {errorMsg}
+        </div>
+      )}
         
         <form onSubmit={handleUpdate} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1">Tanggal</label>
-              <input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="w-full bg-gray-900 border border-gray-700 p-2 rounded text-sm outline-none focus:border-orange-500" />
+              <input type="date" value={date} max={today} onChange={(e) => setDate(e.target.value)} className="w-full bg-gray-900 border border-gray-700 p-2 rounded text-sm outline-none focus:border-orange-500" />
             </div>
             <div>
               <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1">Exchange</label>
@@ -73,15 +111,14 @@ export default function EditModal({ transaction, isOpen, onClose, onSuccess }: E
 
           <div>
             <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1">Modal (IDR)</label>
-            <input type="number" value={fiatAmount} onChange={(e) => setFiatAmount(e.target.value)} className="w-full bg-gray-900 border border-gray-700 p-2 rounded text-sm outline-none focus:border-orange-500" />
+            <input type="number" min="1" value={fiatAmount} onChange={(e) => setFiatAmount(e.target.value)} className="w-full bg-gray-900 border border-gray-700 p-2 rounded text-sm outline-none focus:border-orange-500" />
           </div>
 
           <div>
             <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1">Jumlah BTC</label>
-            <input type="number" step="any" value={btcAmount} onChange={(e) => setBtcAmount(e.target.value)} className="w-full bg-gray-900 border border-gray-700 p-2 rounded text-sm outline-none focus:border-orange-500" />
+            <input type="number" min="0.00000001" step="any" value={btcAmount} onChange={(e) => setBtcAmount(e.target.value)} className="w-full bg-gray-900 border border-gray-700 p-2 rounded text-sm outline-none focus:border-orange-500" />
           </div>
 
-          {/* INPUT FEE BARU - Menyelesaikan error 'setFee' unused */}
           <div>
             <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1">Fee Transaksi (IDR)</label>
             <input type="number" value={fee} onChange={(e) => setFee(e.target.value)} className="w-full bg-gray-900 border border-gray-700 p-2 rounded text-sm outline-none focus:border-orange-500" />
