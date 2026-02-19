@@ -1,36 +1,49 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🚀 BTC DCA Tracker
 
-## Getting Started
+Aplikasi sederhana untuk memantau investasi Bitcoin dengan metode *Dollar Cost Averaging* (DCA) dengan P/L real-time.
 
-First, run the development server:
+## ✨ Fitur Utama
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+* **Real-time PnL Tracking**: Pantau keuntungan/kerugian secara live yang di-update setiap 30 detik melalui integrasi API CoinGecko.
+* **Dual Currency Mode**: Toggle tampilan seluruh dashboard antara **IDR** (Rupiah) dan **USD** (Dollar) untuk standar global.
+* **Complete CRUD**: Manajemen data transaksi penuh (Tambah, Lihat, Edit, dan Hapus).
+* **Secure Authentication**: Sistem login menggunakan Supabase Auth.
+* **Server-side Pagination**: Pembatasan jumlah data per halaman agar tabel tetap rapi.
+* **Data Integrity**: Validasi input input angka 0, negatif, atau tanggal masa depan. Baik di sisi Frontend maupun Database.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 🛠️ Tech Stack
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+* **Framework**: [Next.js 14](https://nextjs.org/) (App Router)
+* **Styling**: [Tailwind CSS](https://tailwindcss.com/)
+* **Database & Auth**: [Supabase](https://supabase.com/)
+* **Real-time Price API**: [CoinGecko API](https://www.coingecko.com/en/api)
+* **Language**: TypeScript
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
-## Learn More
+## 🚀 Memulai (Setup Lokal)
 
-To learn more about Next.js, take a look at the following resources:
+1.  **Clone repositori**:
+    ```bash
+    git clone [https://github.com/your-username/btc-dca-tracker.git](https://github.com/your-username/btc-dca-tracker.git)
+    cd btc-dca-tracker
+    ```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+2.  **Instalasi dependensi**:
+    ```bash
+    npm install
+    ```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+3.  **Konfigurasi Environment Variables**:
+    Buat file `.env.local` dan masukkan kredensial Supabase kamu:
+    ```env
+    NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+    NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+    ```
 
-## Deploy on Vercel
+4.  **Setup Database**:
+    Jalankan query SQL yang ada di folder `/supabase/setup.sql` (jika kamu menyimpannya) untuk membuat tabel `transactions` dan view `dca_summary`.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+5.  **Jalankan aplikasi**:
+    ```bash
+    npm run dev
+    ```
