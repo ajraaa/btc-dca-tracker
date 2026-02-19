@@ -7,8 +7,8 @@ Aplikasi sederhana untuk memantau investasi Bitcoin dengan metode *Dollar Cost A
 * **Real-time PnL Tracking**: Pantau keuntungan/kerugian secara live yang di-update setiap 30 detik melalui integrasi API CoinGecko.
 * **Dual Currency Mode**: Toggle tampilan seluruh dashboard antara **IDR** (Rupiah) dan **USD** (Dollar) untuk standar global.
 * **Complete CRUD**: Manajemen data transaksi penuh (Tambah, Lihat, Edit, dan Hapus).
-* **Secure Authentication**: Sistem login menggunakan Supabase Auth.
-* **Server-side Pagination**: Pembatasan jumlah data per halaman agar tabel tetap rapi.
+* **Authentication**: Sistem login menggunakan Supabase Auth.
+* **Pagination**: Pembatasan jumlah data per halaman agar tabel tetap rapi.
 * **Data Integrity**: Validasi input input angka 0, negatif, atau tanggal masa depan. Baik di sisi Frontend maupun Database.
 
 ## 🛠️ Tech Stack
@@ -24,7 +24,7 @@ Aplikasi sederhana untuk memantau investasi Bitcoin dengan metode *Dollar Cost A
 
 1.  **Clone repositori**:
     ```bash
-    git clone [https://github.com/your-username/btc-dca-tracker.git](https://github.com/your-username/btc-dca-tracker.git)
+    git clone https://github.com/your-username/btc-dca-tracker.git
     cd btc-dca-tracker
     ```
 
