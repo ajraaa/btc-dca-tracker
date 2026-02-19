@@ -9,7 +9,7 @@ Aplikasi sederhana untuk memantau investasi Bitcoin dengan metode *Dollar Cost A
 * **Complete CRUD**: Manajemen data transaksi penuh (Tambah, Lihat, Edit, dan Hapus).
 * **Authentication**: Sistem login menggunakan Supabase Auth.
 * **Pagination**: Pembatasan jumlah data per halaman agar tabel tetap rapi.
-* **Data Integrity**: Validasi input input angka 0, negatif, atau tanggal masa depan. Baik di sisi Frontend maupun Database.
+* **Data Integrity**: Validasi input angka 0, negatif, atau tanggal masa depan. Baik di sisi Frontend maupun Database.
 
 ## 🛠️ Tech Stack
 
