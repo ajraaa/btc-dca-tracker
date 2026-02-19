@@ -13,7 +13,7 @@ Aplikasi sederhana untuk memantau investasi Bitcoin dengan metode *Dollar Cost A
 
 ## 🛠️ Tech Stack
 
-* **Framework**: [Next.js 14](https://nextjs.org/) (App Router)
+* **Framework**: [Next.js](https://nextjs.org/) (App Router)
 * **Styling**: [Tailwind CSS](https://tailwindcss.com/)
 * **Database & Auth**: [Supabase](https://supabase.com/)
 * **Real-time Price API**: [CoinGecko API](https://www.coingecko.com/en/api)
