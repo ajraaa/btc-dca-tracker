@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import TransactionForm from '@/components/TransactionForm'
 import SummaryCards from '@/components/SummaryCards'
 import TransactionTable from '@/components/TransactionTable'
+import TransactionCharts from '../components/TransactionCharts'
 
 // Interface tetap sama
 interface Transaction {
@@ -26,7 +27,8 @@ export default function Dashboard() {
   const [currentPage, setCurrentPage] = useState(1)
   const [totalCount, setTotalCount] = useState(0)
   const [lastUpdated, setLastUpdated] = useState<string>('')
-  const itemsPerPage = 10
+  const [isAddTransactionOpen, setIsAddTransactionOpen] = useState(false)
+  const itemsPerPage = 5
 
   const fetchData = useCallback(async (userId: string, page: number = 1) => {
     const from = (page - 1) * itemsPerPage
@@ -111,14 +113,22 @@ export default function Dashboard() {
           <p className="text-xs text-gray-500 mt-1">{user?.email}</p>
         </div>
         <div className="flex items-center gap-3">
-          <div className="flex bg-gray-900 p-1 rounded-lg border border-gray-800">
-            {(['IDR', 'USD'] as const).map((curr) => (
-              <button 
-                key={curr} 
-                onClick={() => setCurrency(curr)}
-                className={`px-3 py-1 rounded-md text-xs font-bold transition-all ${currency === curr ? 'bg-orange-500 text-white' : 'text-gray-500'}`}
-              >{curr}</button>
-            ))}
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setIsAddTransactionOpen(true)}
+              className="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white text-xs font-bold rounded-lg shadow-md transition-all"
+            >
+              Tambah Transaksi
+            </button>
+            <div className="flex bg-gray-900 p-1 rounded-lg border border-gray-800">
+              {(['IDR', 'USD'] as const).map((curr) => (
+                <button 
+                  key={curr} 
+                  onClick={() => setCurrency(curr)}
+                  className={`px-3 py-1 rounded-md text-xs font-bold transition-all ${currency === curr ? 'bg-orange-500 text-white' : 'text-gray-500'}`}
+                >{curr}</button>
+              ))}
+            </div>
           </div>
           <button onClick={() => supabase.auth.signOut()} className="text-xs text-gray-400 hover:text-white ml-4">Logout</button>
         </div>
@@ -132,21 +142,42 @@ export default function Dashboard() {
         currency={currency} 
       />
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-1">
-          <TransactionForm userId={user!.id} onSuccess={() => fetchData(user!.id, currentPage)} />
-        </div>
-        <div className="lg:col-span-2">
+      <div className="mt-8 grid grid-cols-1 xl:grid-cols-5 gap-6 items-start">
+        <div className="xl:col-span-3">
           <TransactionTable 
             transactions={transactions} 
             onUpdate={() => fetchData(user!.id, currentPage)} 
             currentPage={currentPage}
             totalCount={totalCount}
             itemsPerPage={itemsPerPage}
-            onPageChange={handlePageChange} // Menggunakan fungsi baru kita
+            onPageChange={handlePageChange}
           />
         </div>
+        <div className="xl:col-span-2">
+          <TransactionCharts transactions={transactions} />
+        </div>
       </div>
+
+      {isAddTransactionOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
+          <div className="w-full max-w-xl mx-4">
+            <TransactionForm
+              userId={user!.id}
+              onSuccess={() => {
+                fetchData(user!.id, currentPage)
+                setIsAddTransactionOpen(false)
+              }}
+            />
+            <button
+              type="button"
+              onClick={() => setIsAddTransactionOpen(false)}
+              className="mt-4 w-full bg-gray-800 hover:bg-gray-700 text-gray-200 text-xs font-semibold py-2 px-4 rounded-lg border border-gray-700 transition-all"
+            >
+              Tutup
+            </button>
+          </div>
+        </div>
+      )}
     </main>
   )
 }
