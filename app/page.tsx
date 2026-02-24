@@ -28,22 +28,28 @@ export default function Dashboard() {
   const [totalCount, setTotalCount] = useState(0)
   const [lastUpdated, setLastUpdated] = useState<string>('')
   const [isAddTransactionOpen, setIsAddTransactionOpen] = useState(false)
+  const [allTransactions, setAllTransactions] = useState<Transaction[]>([])
+  const [transactionView, setTransactionView] = useState<'table' | 'bar' | 'line'>('table')
   const itemsPerPage = 5
 
   const fetchData = useCallback(async (userId: string, page: number = 1) => {
-    const from = (page - 1) * itemsPerPage
-    const to = from + itemsPerPage - 1
-    
-    const [txResponse, sumResponse] = await Promise.all([
-      supabase.from('transactions').select('*', { count: 'exact' }).eq('user_id', userId)
-        .order('purchase_date', { ascending: false }).range(from, to),
-      supabase.from('dca_summary').select('*').eq('user_id', userId).maybeSingle()
+    const [allTxResponse, sumResponse] = await Promise.all([
+      supabase
+        .from('transactions')
+        .select('*')
+        .eq('user_id', userId)
+        .order('purchase_date', { ascending: false }),
+      supabase.from('dca_summary').select('*').eq('user_id', userId).maybeSingle(),
     ])
-    
-    if (txResponse.data) {
-      setTransactions(txResponse.data as Transaction[])
-      setTotalCount(txResponse.count || 0)
-    }
+
+    const allTx = (allTxResponse.data as Transaction[]) || []
+    setAllTransactions(allTx)
+    setTotalCount(allTx.length)
+
+    const from = (page - 1) * itemsPerPage
+    const to = from + itemsPerPage
+    setTransactions(allTx.slice(from, to))
+
     if (sumResponse.data) setSummary(sumResponse.data as SummaryData)
   }, [itemsPerPage])
 
@@ -51,20 +57,30 @@ export default function Dashboard() {
     try {
       const res = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=idr,usd')
       const data = await res.json()
-      setPrices({ idr: data.bitcoin.idr, usd: data.bitcoin.usd })
-      setUsdRate(data.bitcoin.idr / data.bitcoin.usd)
-      setLastUpdated(new Date().toLocaleTimeString())
+
+      if (!res.ok) {
+        if (res.status === 429) return // Rate limit: skip tanpa mengganggu UI
+        return
+      }
+
+      const idr = data?.bitcoin?.idr
+      const usd = data?.bitcoin?.usd
+      if (typeof idr === 'number' && typeof usd === 'number' && usd > 0) {
+        setPrices({ idr, usd })
+        setUsdRate(idr / usd)
+        setLastUpdated(new Date().toLocaleTimeString())
+      }
     } catch {
-      console.error("Gagal sinkronisasi harga pasar")
+      // Gagal fetch (network/parse): pertahankan harga terakhir, tidak tampilkan error overlay
     }
   }, [])
 
   // 1. Fungsi khusus untuk menangani perpindahan halaman
   const handlePageChange = (page: number) => {
-    setCurrentPage(page) // Update UI
-    if (user) {
-      fetchData(user.id, page) // Langsung ambil data untuk halaman tersebut
-    }
+    setCurrentPage(page)
+    const from = (page - 1) * itemsPerPage
+    const to = from + itemsPerPage
+    setTransactions(allTransactions.slice(from, to))
   }
 
   // 2. Effect hanya untuk inisialisasi pertama kali (Mount)
@@ -134,7 +150,7 @@ export default function Dashboard() {
         </div>
       </header>
 
-      <SummaryCards 
+      <SummaryCards
         totalModal={summary.total_modal} 
         totalBtc={summary.total_btc} 
         currentPrice={currency === 'IDR' ? prices.idr : prices.usd}
@@ -142,20 +158,43 @@ export default function Dashboard() {
         currency={currency} 
       />
 
-      <div className="mt-8 grid grid-cols-1 xl:grid-cols-5 gap-6 items-start">
-        <div className="xl:col-span-3">
-          <TransactionTable 
-            transactions={transactions} 
-            onUpdate={() => fetchData(user!.id, currentPage)} 
+      <div className="mt-8">
+        <div className="flex justify-end mb-4">
+          <div className="flex bg-gray-900 p-1 rounded-full border border-gray-700 text-[10px] font-semibold">
+            {(['table', 'bar', 'line'] as const).map((view) => (
+              <button
+                key={view}
+                type="button"
+                onClick={() => setTransactionView(view)}
+                className={`px-3 py-1 rounded-full transition-all ${
+                  transactionView === view
+                    ? 'bg-orange-500 text-white'
+                    : 'text-gray-400 hover:text-gray-200'
+                }`}
+              >
+                {view === 'table' ? 'Tabel' : view === 'bar' ? 'Bar Chart' : 'Line Chart'}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {transactionView === 'table' ? (
+          <TransactionTable
+            transactions={transactions}
+            onUpdate={() => fetchData(user!.id, currentPage)}
             currentPage={currentPage}
             totalCount={totalCount}
             itemsPerPage={itemsPerPage}
             onPageChange={handlePageChange}
           />
-        </div>
-        <div className="xl:col-span-2">
-          <TransactionCharts transactions={transactions} />
-        </div>
+        ) : (
+          <div className="h-72 md:h-80">
+            <TransactionCharts
+              mode={transactionView === 'bar' ? 'bar' : 'line'}
+              transactions={allTransactions}
+            />
+          </div>
+        )}
       </div>
 
       {isAddTransactionOpen && (

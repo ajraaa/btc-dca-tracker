@@ -22,12 +22,10 @@ interface Transaction {
 
 interface Props {
   transactions: Transaction[]
+  mode: 'bar' | 'line'
 }
 
-type ChartMode = 'bar' | 'line'
-
-export default function TransactionCharts({ transactions }: Props) {
-  const [mode, setMode] = useState<ChartMode>('bar')
+export default function TransactionCharts({ transactions, mode }: Props) {
   const [btcHistory, setBtcHistory] = useState<
     { isoDate: string; dateLabel: string; btcPrice: number }[]
   >([])
@@ -125,6 +123,9 @@ export default function TransactionCharts({ transactions }: Props) {
     loadHistory()
   }, [firstPurchaseDate?.getTime() ?? 0])
 
+  // Warna hover cursor = sama dengan tabel (hover:bg-gray-700/30)
+  const tooltipCursor = { fill: 'rgba(55, 65, 81, 0.3)' }
+
   // Titik pembelian pada line chart (tanggal transaksi)
   const purchasePoints = useMemo(() => {
     if (!transactions.length || !btcHistory.length) return []
@@ -140,39 +141,13 @@ export default function TransactionCharts({ transactions }: Props) {
 
   return (
     <div className="bg-gray-800 rounded-xl border border-gray-700 p-4 shadow-xl h-full">
-      <div className="flex items-center justify-between mb-4">
-        <div>
-          <h2 className="text-sm font-semibold text-gray-100">
-            Visualisasi DCA BTC
-          </h2>
-          <p className="text-[10px] text-gray-500">
-            Lihat distribusi modal & harga beli
-          </p>
-        </div>
-        <div className="flex bg-gray-900 p-1 rounded-full border border-gray-700 text-[10px] font-semibold">
-          <button
-            type="button"
-            onClick={() => setMode('bar')}
-            className={`px-3 py-1 rounded-full transition-all ${
-              mode === 'bar'
-                ? 'bg-orange-500 text-white'
-                : 'text-gray-400 hover:text-gray-200'
-            }`}
-          >
-            Bar Chart
-          </button>
-          <button
-            type="button"
-            onClick={() => setMode('line')}
-            className={`px-3 py-1 rounded-full transition-all ${
-              mode === 'line'
-                ? 'bg-orange-500 text-white'
-                : 'text-gray-400 hover:text-gray-200'
-            }`}
-          >
-            Line Chart
-          </button>
-        </div>
+      <div className="mb-4">
+        <h2 className="text-sm font-semibold text-gray-100">
+          Visualisasi DCA BTC
+        </h2>
+        <p className="text-[10px] text-gray-500">
+          Lihat distribusi modal & harga beli
+        </p>
       </div>
 
       {!hasData ? (
@@ -199,14 +174,15 @@ export default function TransactionCharts({ transactions }: Props) {
                   }
                 />
                 <Tooltip
+                  cursor={tooltipCursor}
                   contentStyle={{
                     backgroundColor: '#020617',
                     border: '1px solid #374151',
                     borderRadius: '0.5rem',
                     fontSize: 10,
                   }}
-                  formatter={(value: number) => [
-                    `Rp ${value.toLocaleString('id-ID')}`,
+                  formatter={(value: number | undefined) => [
+                    value != null ? `Rp ${value.toLocaleString('id-ID')}` : '-',
                     'Modal',
                   ]}
                   labelStyle={{ fontSize: 10, color: '#e5e7eb' }}
@@ -231,11 +207,12 @@ export default function TransactionCharts({ transactions }: Props) {
                 </div>
               )}
               {!loadingHistory && btcHistory.length > 0 && (
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart
-                    data={btcHistory}
-                    margin={{ top: 10, right: 10, left: -10, bottom: 30 }}
-                  >
+                <div className="relative h-full">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart
+                      data={btcHistory}
+                      margin={{ top: 10, right: 10, left: -10, bottom: 40 }}
+                    >
                     <CartesianGrid strokeDasharray="3 3" stroke="#1f2937" />
                     <XAxis
                       dataKey="dateLabel"
@@ -251,15 +228,19 @@ export default function TransactionCharts({ transactions }: Props) {
                       }
                     />
                     <Tooltip
-                      cursor={{ stroke: '#4b5563', strokeDasharray: '3 3' }}
+                      cursor={{
+                        fill: 'rgba(55, 65, 81, 0.3)',
+                        stroke: '#4b5563',
+                        strokeDasharray: '3 3',
+                      }}
                       contentStyle={{
                         backgroundColor: '#020617',
                         border: '1px solid #374151',
                         borderRadius: '0.5rem',
                         fontSize: 10,
                       }}
-                      formatter={(value: number) => [
-                        `Rp ${value.toLocaleString('id-ID')}`,
+                      formatter={(value: number | undefined) => [
+                        value != null ? `Rp ${value.toLocaleString('id-ID')}` : '-',
                         'Harga BTC (IDR)',
                       ]}
                       labelStyle={{ fontSize: 10, color: '#e5e7eb' }}
@@ -267,6 +248,7 @@ export default function TransactionCharts({ transactions }: Props) {
                     <Line
                       type="monotone"
                       dataKey="btcPrice"
+                      data={purchasePoints}
                       stroke="#f97316"
                       strokeWidth={2}
                       dot={false}
@@ -279,6 +261,17 @@ export default function TransactionCharts({ transactions }: Props) {
                     />
                   </BarChart>
                 </ResponsiveContainer>
+                  <div className="absolute bottom-1 right-2 flex items-center gap-4 text-[10px] text-gray-400">
+                    <span className="flex items-center gap-1.5">
+                      <span className="inline-block h-0.5 w-5 bg-orange-500" />
+                      Harga BTC
+                    </span>
+                    <span className="flex items-center gap-1.5">
+                      <span className="h-2 w-2 rounded-full bg-yellow-400" />
+                      Pembelian
+                    </span>
+                  </div>
+                </div>
               )}
             </>
           )}
