@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import TransactionForm from '@/components/TransactionForm'
 import SummaryCards from '@/components/SummaryCards'
 import TransactionTable from '@/components/TransactionTable'
+import TransactionCharts from '../components/TransactionCharts'
 
 // Interface tetap sama
 interface Transaction {
@@ -26,22 +27,29 @@ export default function Dashboard() {
   const [currentPage, setCurrentPage] = useState(1)
   const [totalCount, setTotalCount] = useState(0)
   const [lastUpdated, setLastUpdated] = useState<string>('')
-  const itemsPerPage = 10
+  const [isAddTransactionOpen, setIsAddTransactionOpen] = useState(false)
+  const [allTransactions, setAllTransactions] = useState<Transaction[]>([])
+  const [transactionView, setTransactionView] = useState<'table' | 'bar' | 'line'>('table')
+  const itemsPerPage = 5
 
   const fetchData = useCallback(async (userId: string, page: number = 1) => {
-    const from = (page - 1) * itemsPerPage
-    const to = from + itemsPerPage - 1
-    
-    const [txResponse, sumResponse] = await Promise.all([
-      supabase.from('transactions').select('*', { count: 'exact' }).eq('user_id', userId)
-        .order('purchase_date', { ascending: false }).range(from, to),
-      supabase.from('dca_summary').select('*').eq('user_id', userId).maybeSingle()
+    const [allTxResponse, sumResponse] = await Promise.all([
+      supabase
+        .from('transactions')
+        .select('*')
+        .eq('user_id', userId)
+        .order('purchase_date', { ascending: false }),
+      supabase.from('dca_summary').select('*').eq('user_id', userId).maybeSingle(),
     ])
-    
-    if (txResponse.data) {
-      setTransactions(txResponse.data as Transaction[])
-      setTotalCount(txResponse.count || 0)
-    }
+
+    const allTx = (allTxResponse.data as Transaction[]) || []
+    setAllTransactions(allTx)
+    setTotalCount(allTx.length)
+
+    const from = (page - 1) * itemsPerPage
+    const to = from + itemsPerPage
+    setTransactions(allTx.slice(from, to))
+
     if (sumResponse.data) setSummary(sumResponse.data as SummaryData)
   }, [itemsPerPage])
 
@@ -49,20 +57,30 @@ export default function Dashboard() {
     try {
       const res = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=idr,usd')
       const data = await res.json()
-      setPrices({ idr: data.bitcoin.idr, usd: data.bitcoin.usd })
-      setUsdRate(data.bitcoin.idr / data.bitcoin.usd)
-      setLastUpdated(new Date().toLocaleTimeString())
+
+      if (!res.ok) {
+        if (res.status === 429) return // Rate limit: skip tanpa mengganggu UI
+        return
+      }
+
+      const idr = data?.bitcoin?.idr
+      const usd = data?.bitcoin?.usd
+      if (typeof idr === 'number' && typeof usd === 'number' && usd > 0) {
+        setPrices({ idr, usd })
+        setUsdRate(idr / usd)
+        setLastUpdated(new Date().toLocaleTimeString())
+      }
     } catch {
-      console.error("Gagal sinkronisasi harga pasar")
+      // Gagal fetch (network/parse): pertahankan harga terakhir, tidak tampilkan error overlay
     }
   }, [])
 
   // 1. Fungsi khusus untuk menangani perpindahan halaman
   const handlePageChange = (page: number) => {
-    setCurrentPage(page) // Update UI
-    if (user) {
-      fetchData(user.id, page) // Langsung ambil data untuk halaman tersebut
-    }
+    setCurrentPage(page)
+    const from = (page - 1) * itemsPerPage
+    const to = from + itemsPerPage
+    setTransactions(allTransactions.slice(from, to))
   }
 
   // 2. Effect hanya untuk inisialisasi pertama kali (Mount)
@@ -111,20 +129,28 @@ export default function Dashboard() {
           <p className="text-xs text-gray-500 mt-1">{user?.email}</p>
         </div>
         <div className="flex items-center gap-3">
-          <div className="flex bg-gray-900 p-1 rounded-lg border border-gray-800">
-            {(['IDR', 'USD'] as const).map((curr) => (
-              <button 
-                key={curr} 
-                onClick={() => setCurrency(curr)}
-                className={`px-3 py-1 rounded-md text-xs font-bold transition-all ${currency === curr ? 'bg-orange-500 text-white' : 'text-gray-500'}`}
-              >{curr}</button>
-            ))}
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setIsAddTransactionOpen(true)}
+              className="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white text-xs font-bold rounded-lg shadow-md transition-all"
+            >
+              Tambah Transaksi
+            </button>
+            <div className="flex bg-gray-900 p-1 rounded-lg border border-gray-800">
+              {(['IDR', 'USD'] as const).map((curr) => (
+                <button 
+                  key={curr} 
+                  onClick={() => setCurrency(curr)}
+                  className={`px-3 py-1 rounded-md text-xs font-bold transition-all ${currency === curr ? 'bg-orange-500 text-white' : 'text-gray-500'}`}
+                >{curr}</button>
+              ))}
+            </div>
           </div>
           <button onClick={() => supabase.auth.signOut()} className="text-xs text-gray-400 hover:text-white ml-4">Logout</button>
         </div>
       </header>
 
-      <SummaryCards 
+      <SummaryCards
         totalModal={summary.total_modal} 
         totalBtc={summary.total_btc} 
         currentPrice={currency === 'IDR' ? prices.idr : prices.usd}
@@ -132,21 +158,65 @@ export default function Dashboard() {
         currency={currency} 
       />
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-1">
-          <TransactionForm userId={user!.id} onSuccess={() => fetchData(user!.id, currentPage)} />
+      <div className="mt-8">
+        <div className="flex justify-end mb-4">
+          <div className="flex bg-gray-900 p-1 rounded-full border border-gray-700 text-[10px] font-semibold">
+            {(['table', 'bar', 'line'] as const).map((view) => (
+              <button
+                key={view}
+                type="button"
+                onClick={() => setTransactionView(view)}
+                className={`px-3 py-1 rounded-full transition-all ${
+                  transactionView === view
+                    ? 'bg-orange-500 text-white'
+                    : 'text-gray-400 hover:text-gray-200'
+                }`}
+              >
+                {view === 'table' ? 'Tabel' : view === 'bar' ? 'Bar Chart' : 'Line Chart'}
+              </button>
+            ))}
+          </div>
         </div>
-        <div className="lg:col-span-2">
-          <TransactionTable 
-            transactions={transactions} 
-            onUpdate={() => fetchData(user!.id, currentPage)} 
+
+        {transactionView === 'table' ? (
+          <TransactionTable
+            transactions={transactions}
+            onUpdate={() => fetchData(user!.id, currentPage)}
             currentPage={currentPage}
             totalCount={totalCount}
             itemsPerPage={itemsPerPage}
-            onPageChange={handlePageChange} // Menggunakan fungsi baru kita
+            onPageChange={handlePageChange}
           />
-        </div>
+        ) : (
+          <div className="h-72 md:h-80">
+            <TransactionCharts
+              mode={transactionView === 'bar' ? 'bar' : 'line'}
+              transactions={allTransactions}
+            />
+          </div>
+        )}
       </div>
+
+      {isAddTransactionOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
+          <div className="w-full max-w-xl mx-4">
+            <TransactionForm
+              userId={user!.id}
+              onSuccess={() => {
+                fetchData(user!.id, currentPage)
+                setIsAddTransactionOpen(false)
+              }}
+            />
+            <button
+              type="button"
+              onClick={() => setIsAddTransactionOpen(false)}
+              className="mt-4 w-full bg-gray-800 hover:bg-gray-700 text-gray-200 text-xs font-semibold py-2 px-4 rounded-lg border border-gray-700 transition-all"
+            >
+              Tutup
+            </button>
+          </div>
+        </div>
+      )}
     </main>
   )
 }
