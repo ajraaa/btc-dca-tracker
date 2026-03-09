@@ -121,7 +121,7 @@ export default function TransactionCharts({ transactions, mode }: Props) {
     }
 
     loadHistory()
-  }, [firstPurchaseDate?.getTime() ?? 0])
+  }, [firstPurchaseDate])
 
   // Warna hover cursor = sama dengan tabel (hover:bg-gray-700/30)
   const tooltipCursor = { fill: 'rgba(55, 65, 81, 0.3)' }
