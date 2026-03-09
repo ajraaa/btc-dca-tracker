@@ -1,14 +1,17 @@
+'use client'
 import { useEffect, useMemo, useState } from 'react'
 import {
   ResponsiveContainer,
+  ComposedChart,
   BarChart,
   Bar,
+  Area,
   XAxis,
   YAxis,
   Tooltip,
   CartesianGrid,
-  Line,
   Scatter,
+  Cell,
 } from 'recharts'
 
 interface Transaction {
@@ -25,259 +28,154 @@ interface Props {
   mode: 'bar' | 'line'
 }
 
+interface BtcHistoryPoint {
+  ts: number
+  dateLabel: string
+  isoDate: string
+  btcPrice: number
+}
+
 export default function TransactionCharts({ transactions, mode }: Props) {
-  const [btcHistory, setBtcHistory] = useState<
-    { isoDate: string; dateLabel: string; btcPrice: number }[]
-  >([])
+  const [btcHistory, setBtcHistory] = useState<BtcHistoryPoint[]>([])
   const [loadingHistory, setLoadingHistory] = useState(false)
 
-  const chartData = useMemo(
-    () =>
-      [...transactions]
-        .slice()
-        .sort(
-          (a, b) =>
-            new Date(a.purchase_date).getTime() -
-            new Date(b.purchase_date).getTime(),
-        )
-        .map((tx) => {
-          const dateLabel = new Date(tx.purchase_date).toLocaleDateString(
-            'id-ID',
-            {
-              day: '2-digit',
-              month: 'short',
-              year: 'numeric',
-            },
-          )
-          const impliedPrice =
-            tx.btc_amount > 0 ? tx.fiat_amount / tx.btc_amount : 0
-
-          return {
-            id: tx.id,
-            dateLabel,
-            fiatAmount: tx.fiat_amount,
-            impliedPrice,
-          }
-        }),
-    [transactions],
-  )
-
-  const hasData = chartData.length > 0
-
-  // Tanggal pembelian pertama (untuk rentang chart)
-  const firstPurchaseDate = useMemo(() => {
-    if (!transactions.length) return null
-    const dates = transactions.map((tx) => new Date(tx.purchase_date).getTime())
-    return new Date(Math.min(...dates))
-  }, [transactions])
-
-  // Ambil harga historis BTC dari tanggal pembelian pertama hingga sekarang
+  // 1. Ambil data historis BTC (Hanya untuk mode Line)
   useEffect(() => {
     const loadHistory = async () => {
+      if (!transactions.length || mode !== 'line') return
       setLoadingHistory(true)
       try {
-        const now = Date.now()
-        const from = firstPurchaseDate
-          ? firstPurchaseDate.getTime()
-          : now - 365 * 24 * 60 * 60 * 1000
-        const days = Math.max(1, Math.ceil((now - from) / (24 * 60 * 60 * 1000)))
-        // Coingecko batasi ~days; gunakan max 2000 hari untuk keamanan
-        const safeDays = Math.min(days, 2000)
-
-        const res = await fetch(
-          `https://api.coingecko.com/api/v3/coins/bitcoin/market_chart?vs_currency=idr&days=${safeDays}`,
-        )
-        if (!res.ok) throw new Error(`HTTP ${res.status}`)
+        const firstDate = new Date(Math.min(...transactions.map(t => new Date(t.purchase_date).getTime())))
+        const days = Math.max(1, Math.ceil((Date.now() - firstDate.getTime()) / (24 * 60 * 60 * 1000)))
+        
+        const res = await fetch(`https://api.coingecko.com/api/v3/coins/bitcoin/market_chart?vs_currency=idr&days=${days}`)
         const json = await res.json()
-        const prices: [number, number][] = json?.prices || []
-
-        const cutoff = from
-
-        const cleaned: { isoDate: string; dateLabel: string; btcPrice: number }[] =
-          prices
-            .filter(([ts]) => ts >= cutoff)
-            .map(([ts, price]) => {
-              const d = new Date(ts)
-              const isoDate = d.toISOString().split('T')[0]
-              const dateLabel = d.toLocaleDateString('id-ID', {
-                day: '2-digit',
-                month: 'short',
-                year: 'numeric',
-              })
-              return { isoDate, dateLabel, btcPrice: price }
-            })
-            .sort(
-              (a, b) =>
-                new Date(a.isoDate).getTime() - new Date(b.isoDate).getTime(),
-            )
-
-        setBtcHistory(cleaned)
+        
+        const prices = json.prices.map(([ts, price]: [number, number]) => ({
+          ts,
+          dateLabel: new Date(ts).toLocaleDateString('id-ID', { day: '2-digit', month: 'short' }),
+          isoDate: new Date(ts).toISOString().split('T')[0],
+          btcPrice: price
+        }))
+        setBtcHistory(prices)
       } catch (err) {
-        console.error('Gagal mengambil data historis BTC', err)
-        setBtcHistory([])
+        console.error('Gagal fetch harga:', err)
       } finally {
         setLoadingHistory(false)
       }
     }
-
     loadHistory()
-  }, [firstPurchaseDate])
+  }, [transactions, mode])
 
-  // Warna hover cursor = sama dengan tabel (hover:bg-gray-700/30)
-  const tooltipCursor = { fill: 'rgba(55, 65, 81, 0.3)' }
+  // 2. Data khusus untuk Bar Chart (Urut berdasarkan tanggal)
+  const barData = useMemo(() => {
+    return [...transactions]
+      .sort((a, b) => new Date(a.purchase_date).getTime() - new Date(b.purchase_date).getTime())
+      .map(tx => ({
+        dateLabel: new Date(tx.purchase_date).toLocaleDateString('id-ID', { day: '2-digit', month: 'short' }),
+        fiatAmount: tx.fiat_amount,
+        btcAmount: tx.btc_amount
+      }))
+  }, [transactions])
 
-  // Titik pembelian pada line chart (tanggal transaksi)
-  const purchasePoints = useMemo(() => {
-    if (!transactions.length || !btcHistory.length) return []
+  // 3. MERGE DATA: Untuk mode Line (Harga Market + Titik Beli)
+  const mergedData = useMemo(() => {
+    if (!btcHistory.length) return []
+    const txMap = transactions.reduce((acc: Record<string, { fiat: number, btc: number }>, tx) => {
+      const date = new Date(tx.purchase_date).toISOString().split('T')[0]
+      if (!acc[date]) acc[date] = { fiat: 0, btc: 0 }
+      acc[date].fiat += tx.fiat_amount
+      acc[date].btc += tx.btc_amount
+      return acc
+    }, {})
 
-    const purchaseDates = new Set(
-      transactions.map((tx) =>
-        new Date(tx.purchase_date).toISOString().split('T')[0],
-      ),
-    )
+    return btcHistory.map(point => ({
+      ...point,
+      purchasePrice: txMap[point.isoDate] ? point.btcPrice : null,
+      fiatAmount: txMap[point.isoDate]?.fiat || 0,
+      btcBought: txMap[point.isoDate]?.btc || null
+    }))
+  }, [btcHistory, transactions])
 
-    return btcHistory.filter((p) => purchaseDates.has(p.isoDate))
-  }, [transactions, btcHistory])
+  if (mode === 'line' && loadingHistory) {
+    return <div className="h-72 flex items-center justify-center text-gray-500 text-xs">Menyelaraskan data pasar...</div>
+  }
 
   return (
-    <div className="bg-gray-800 rounded-xl border border-gray-700 p-4 shadow-xl h-full">
-      <div className="mb-4">
-        <h2 className="text-sm font-semibold text-gray-100">
-          Visualisasi DCA BTC
-        </h2>
-        <p className="text-[10px] text-gray-500">
-          Lihat distribusi modal & harga beli
-        </p>
+    <div className="bg-gray-900/50 rounded-xl border border-gray-800 p-6 shadow-2xl h-full">
+      <div className="flex justify-between items-start mb-6">
+        <div>
+          <h2 className="text-sm font-bold text-gray-100 tracking-tight uppercase">
+            {mode === 'bar' ? 'Distribusi Modal' : 'Strategi Akumulasi'}
+          </h2>
+          <p className="text-[10px] text-gray-500">
+            {mode === 'bar' 
+              ? 'Besaran Rupiah yang dialokasikan per transaksi' 
+              : 'Titik kuning menunjukkan eksekusi DCA kamu terhadap harga pasar'}
+          </p>
+        </div>
       </div>
 
-      {!hasData ? (
-        <div className="h-64 flex items-center justify-center text-xs text-gray-500">
-          Belum ada data untuk ditampilkan.
-        </div>
-      ) : (
-        <div className="h-64">
+      <div className="h-72">
+        <ResponsiveContainer width="100%" height="100%">
           {mode === 'bar' ? (
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={chartData} margin={{ top: 10, right: 10, left: -10, bottom: 30 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#1f2937" />
-                <XAxis
-                  dataKey="dateLabel"
-                  tick={{ fontSize: 10, fill: '#9ca3af' }}
-                  angle={-30}
-                  textAnchor="end"
-                  height={40}
-                />
-                <YAxis
-                  tick={{ fontSize: 10, fill: '#9ca3af' }}
-                  tickFormatter={(v) =>
-                    `Rp ${(v as number).toLocaleString('id-ID')}`
-                  }
-                />
-                <Tooltip
-                  cursor={tooltipCursor}
-                  contentStyle={{
-                    backgroundColor: '#020617',
-                    border: '1px solid #374151',
-                    borderRadius: '0.5rem',
-                    fontSize: 10,
-                  }}
-                  formatter={(value: number | undefined) => [
-                    value != null ? `Rp ${value.toLocaleString('id-ID')}` : '-',
-                    'Modal',
-                  ]}
-                  labelStyle={{ fontSize: 10, color: '#e5e7eb' }}
-                />
-                <Bar
-                  dataKey="fiatAmount"
-                  fill="#f97316"
-                  radius={[4, 4, 0, 0]}
-                />
-              </BarChart>
-            </ResponsiveContainer>
+            /* --- RENDER BAR CHART --- */
+            <BarChart data={barData} margin={{ top: 10, right: 10, left: 10, bottom: 20 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#1f2937" vertical={false} />
+              <XAxis dataKey="dateLabel" tick={{ fontSize: 9, fill: '#4b5563' }} axisLine={false} tickLine={false} />
+              <YAxis tick={{ fontSize: 9, fill: '#4b5563' }} axisLine={false} tickLine={false} tickFormatter={(v) => `Rp ${v.toLocaleString('id-ID')}`} />
+              <Tooltip
+                contentStyle={{ backgroundColor: '#0f172a', border: '1px solid #1e293b', borderRadius: '8px', fontSize: '11px' }}
+                itemStyle={{ color: '#e2e8f0' }}
+                labelStyle={{ color: '#94a3b8' }}
+                formatter={(v: number | undefined) => [`Rp ${(v ?? 0).toLocaleString('id-ID')}`, 'Modal']}
+              />
+              <Bar dataKey="fiatAmount" fill="#f97316" radius={[4, 4, 0, 0]} />
+            </BarChart>
           ) : (
-            <>
-              {loadingHistory && (
-                <div className="h-64 flex items-center justify-center text-xs text-gray-500">
-                  Memuat data historis BTC...
-                </div>
-              )}
-              {!loadingHistory && btcHistory.length === 0 && (
-                <div className="h-64 flex items-center justify-center text-xs text-gray-500">
-                  Tidak dapat memuat data historis BTC.
-                </div>
-              )}
-              {!loadingHistory && btcHistory.length > 0 && (
-                <div className="relative h-full">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart
-                      data={btcHistory}
-                      margin={{ top: 10, right: 10, left: -10, bottom: 40 }}
-                    >
-                    <CartesianGrid strokeDasharray="3 3" stroke="#1f2937" />
-                    <XAxis
-                      dataKey="dateLabel"
-                      tick={{ fontSize: 10, fill: '#9ca3af' }}
-                      angle={-30}
-                      textAnchor="end"
-                      height={40}
-                    />
-                    <YAxis
-                      tick={{ fontSize: 10, fill: '#9ca3af' }}
-                      tickFormatter={(v) =>
-                        `Rp ${(v as number).toLocaleString('id-ID')}`
-                      }
-                    />
-                    <Tooltip
-                      cursor={{
-                        fill: 'rgba(55, 65, 81, 0.3)',
-                        stroke: '#4b5563',
-                        strokeDasharray: '3 3',
-                      }}
-                      contentStyle={{
-                        backgroundColor: '#020617',
-                        border: '1px solid #374151',
-                        borderRadius: '0.5rem',
-                        fontSize: 10,
-                      }}
-                      formatter={(value: number | undefined) => [
-                        value != null ? `Rp ${value.toLocaleString('id-ID')}` : '-',
-                        'Harga BTC (IDR)',
-                      ]}
-                      labelStyle={{ fontSize: 10, color: '#e5e7eb' }}
-                    />
-                    <Line
-                      type="monotone"
-                      dataKey="btcPrice"
-                      data={purchasePoints}
-                      stroke="#f97316"
-                      strokeWidth={2}
-                      dot={false}
-                    />
-                    <Scatter
-                      data={purchasePoints}
-                      dataKey="btcPrice"
-                      fill="#facc15"
-                      shape="circle"
-                    />
-                  </BarChart>
-                </ResponsiveContainer>
-                  <div className="absolute bottom-1 right-2 flex items-center gap-4 text-[10px] text-gray-400">
-                    <span className="flex items-center gap-1.5">
-                      <span className="inline-block h-0.5 w-5 bg-orange-500" />
-                      Harga BTC
-                    </span>
-                    <span className="flex items-center gap-1.5">
-                      <span className="h-2 w-2 rounded-full bg-yellow-400" />
-                      Pembelian
-                    </span>
-                  </div>
-                </div>
-              )}
-            </>
+            /* --- RENDER LINE/AREA CHART (MICROSTRATEGY STYLE) --- */
+            <ComposedChart data={mergedData} margin={{ top: 10, right: 10, left: 10, bottom: 20 }}>
+              <defs>
+                <linearGradient id="colorBtc" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#f97316" stopOpacity={0.3}/>
+                  <stop offset="95%" stopColor="#f97316" stopOpacity={0}/>
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" stroke="#1f2937" vertical={false} />
+              <XAxis dataKey="dateLabel" tick={{ fontSize: 9, fill: '#fbbf24' }} minTickGap={30} axisLine={false} tickLine={false} />
+              <YAxis hide={true} domain={['auto', 'auto']} />
+              <Tooltip
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                content={({ active, payload, label }: any) => {
+                  if (active && payload && payload.length) {
+                    const data = payload[0].payload
+                    return (
+                      <div style={{ backgroundColor: '#0f172a', border: '1px solid #1e293b', borderRadius: '8px', padding: '10px', fontSize: '11px' }}>
+                        <p style={{ color: '#94a3b8', margin: '0 0 6px 0' }}>{label}</p>
+                        <p style={{ color: '#e2e8f0', margin: 0 }}>
+                          Harga Market: Rp {Math.round(data.btcPrice || 0).toLocaleString('id-ID')}
+                        </p>
+                        {data.purchasePrice && data.btcBought ? (
+                          <p style={{ color: '#fbbf24', margin: '6px 0 0 0' }}>
+                            BTC Didapat: {data.btcBought.toLocaleString('en-US', { maximumFractionDigits: 8 })} BTC
+                          </p>
+                        ) : null}
+                      </div>
+                    )
+                  }
+                  return null
+                }}
+              />
+              <Area type="monotone" dataKey="btcPrice" stroke="#f97316" strokeWidth={2} fillOpacity={1} fill="url(#colorBtc)" dot={false} />
+              <Scatter dataKey="purchasePrice" fill="#fbbf24">
+                {mergedData.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={entry.purchasePrice ? '#fbbf24' : 'transparent'} />
+                ))}
+              </Scatter>
+            </ComposedChart>
           )}
-        </div>
-      )}
+        </ResponsiveContainer>
+      </div>
     </div>
   )
 }
-
