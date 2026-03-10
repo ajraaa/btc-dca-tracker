@@ -188,12 +188,10 @@ export default function Dashboard() {
             onPageChange={handlePageChange}
           />
         ) : (
-          <div className="h-72 md:h-80">
-            <TransactionCharts
-              mode={transactionView === 'bar' ? 'bar' : 'line'}
-              transactions={allTransactions}
-            />
-          </div>
+          <TransactionCharts
+            mode={transactionView === 'bar' ? 'bar' : 'line'}
+            transactions={allTransactions}
+          />
         )}
       </div>
 
