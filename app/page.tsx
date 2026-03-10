@@ -30,7 +30,7 @@ export default function Dashboard() {
   const [isAddTransactionOpen, setIsAddTransactionOpen] = useState(false)
   const [allTransactions, setAllTransactions] = useState<Transaction[]>([])
   const [transactionView, setTransactionView] = useState<'table' | 'bar' | 'line'>('table')
-  const itemsPerPage = 5
+  const itemsPerPage = 10
 
   const fetchData = useCallback(async (userId: string, page: number = 1) => {
     const [allTxResponse, sumResponse] = await Promise.all([

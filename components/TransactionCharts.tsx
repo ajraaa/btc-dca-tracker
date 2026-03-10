@@ -1,5 +1,5 @@
 'use client'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState, useRef } from 'react'
 import {
   ResponsiveContainer,
   ComposedChart,
@@ -38,6 +38,27 @@ interface BtcHistoryPoint {
 export default function TransactionCharts({ transactions, mode }: Props) {
   const [btcHistory, setBtcHistory] = useState<BtcHistoryPoint[]>([])
   const [loadingHistory, setLoadingHistory] = useState(false)
+  const containerRef = useRef<HTMLDivElement>(null)
+  const [containerWidth, setContainerWidth] = useState(800)
+  const [isMobile, setIsMobile] = useState(false)
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768)
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
+
+  useEffect(() => {
+    if (!containerRef.current) return
+    const observer = new ResizeObserver((entries) => {
+      if (entries[0]) {
+        setContainerWidth(entries[0].contentRect.width)
+      }
+    })
+    observer.observe(containerRef.current)
+    return () => observer.disconnect()
+  }, [])
 
   // 1. Ambil data historis BTC (Hanya untuk mode Line)
   useEffect(() => {
@@ -97,6 +118,12 @@ export default function TransactionCharts({ transactions, mode }: Props) {
     }))
   }, [btcHistory, transactions])
 
+  const chartWidth = isMobile
+    ? (mode === 'bar' 
+        ? Math.max(containerWidth, barData.length * 60) 
+        : Math.max(containerWidth, mergedData.length * 8))
+    : containerWidth; // Full width on desktop, no scrolling
+
   if (mode === 'line' && loadingHistory) {
     return <div className="h-72 flex items-center justify-center text-gray-500 text-xs">Menyelaraskan data pasar...</div>
   }
@@ -116,11 +143,12 @@ export default function TransactionCharts({ transactions, mode }: Props) {
         </div>
       </div>
 
-      <div className="h-72">
-        <ResponsiveContainer width="100%" height="100%">
-          {mode === 'bar' ? (
-            /* --- RENDER BAR CHART --- */
-            <BarChart data={barData} margin={{ top: 10, right: 10, left: 10, bottom: 20 }}>
+      <div className={`h-72 w-full ${isMobile ? 'overflow-x-auto overflow-y-hidden' : 'overflow-hidden'}`} ref={containerRef} style={{ scrollbarWidth: 'thin' }}>
+        {isMobile ? (
+          <div style={{ width: chartWidth, height: '100%' }}>
+            {mode === 'bar' ? (
+              /* --- RENDER BAR CHART --- */
+              <BarChart width={chartWidth} height={288} data={barData} margin={{ top: 10, right: 10, left: 10, bottom: 20 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#1f2937" vertical={false} />
               <XAxis dataKey="dateLabel" tick={{ fontSize: 9, fill: '#4b5563' }} axisLine={false} tickLine={false} />
               <YAxis tick={{ fontSize: 9, fill: '#4b5563' }} axisLine={false} tickLine={false} tickFormatter={(v) => `Rp ${v.toLocaleString('id-ID')}`} />
@@ -132,9 +160,9 @@ export default function TransactionCharts({ transactions, mode }: Props) {
               />
               <Bar dataKey="fiatAmount" fill="#f97316" radius={[4, 4, 0, 0]} />
             </BarChart>
-          ) : (
-            /* --- RENDER LINE/AREA CHART (MICROSTRATEGY STYLE) --- */
-            <ComposedChart data={mergedData} margin={{ top: 10, right: 10, left: 10, bottom: 20 }}>
+            ) : (
+              /* --- RENDER LINE/AREA CHART (MICROSTRATEGY STYLE) --- */
+              <ComposedChart width={chartWidth} height={288} data={mergedData} margin={{ top: 10, right: 10, left: 10, bottom: 20 }}>
               <defs>
                 <linearGradient id="colorBtc" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%" stopColor="#f97316" stopOpacity={0.3}/>
@@ -171,10 +199,70 @@ export default function TransactionCharts({ transactions, mode }: Props) {
                 {mergedData.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={entry.purchasePrice ? '#fbbf24' : 'transparent'} />
                 ))}
-              </Scatter>
-            </ComposedChart>
-          )}
-        </ResponsiveContainer>
+                </Scatter>
+              </ComposedChart>
+            )}
+          </div>
+        ) : (
+          <ResponsiveContainer width="100%" height="100%">
+            {mode === 'bar' ? (
+              /* --- RENDER BAR CHART (DESKTOP) --- */
+              <BarChart data={barData} margin={{ top: 10, right: 10, left: 10, bottom: 20 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#1f2937" vertical={false} />
+                <XAxis dataKey="dateLabel" tick={{ fontSize: 9, fill: '#4b5563' }} axisLine={false} tickLine={false} />
+                <YAxis tick={{ fontSize: 9, fill: '#4b5563' }} axisLine={false} tickLine={false} tickFormatter={(v) => `Rp ${v.toLocaleString('id-ID')}`} />
+                <Tooltip
+                  contentStyle={{ backgroundColor: '#0f172a', border: '1px solid #1e293b', borderRadius: '8px', fontSize: '11px' }}
+                  itemStyle={{ color: '#e2e8f0' }}
+                  labelStyle={{ color: '#94a3b8' }}
+                  formatter={(v: number | undefined) => [`Rp ${(v ?? 0).toLocaleString('id-ID')}`, 'Modal']}
+                />
+                <Bar dataKey="fiatAmount" fill="#f97316" radius={[4, 4, 0, 0]} />
+              </BarChart>
+            ) : (
+              /* --- RENDER LINE/AREA CHART (DESKTOP) --- */
+              <ComposedChart data={mergedData} margin={{ top: 10, right: 10, left: 10, bottom: 20 }}>
+                <defs>
+                  <linearGradient id="colorBtc" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#f97316" stopOpacity={0.3}/>
+                    <stop offset="95%" stopColor="#f97316" stopOpacity={0}/>
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="#1f2937" vertical={false} />
+                <XAxis dataKey="dateLabel" tick={{ fontSize: 9, fill: '#fbbf24' }} minTickGap={30} axisLine={false} tickLine={false} />
+                <YAxis hide={true} domain={['auto', 'auto']} />
+                <Tooltip
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                  content={({ active, payload, label }: any) => {
+                    if (active && payload && payload.length) {
+                      const data = payload[0].payload
+                      return (
+                        <div style={{ backgroundColor: '#0f172a', border: '1px solid #1e293b', borderRadius: '8px', padding: '10px', fontSize: '11px' }}>
+                          <p style={{ color: '#94a3b8', margin: '0 0 6px 0' }}>{label}</p>
+                          <p style={{ color: '#e2e8f0', margin: 0 }}>
+                            Harga Market: Rp {Math.round(data.btcPrice || 0).toLocaleString('id-ID')}
+                          </p>
+                          {data.purchasePrice && data.btcBought ? (
+                            <p style={{ color: '#fbbf24', margin: '6px 0 0 0' }}>
+                              BTC Didapat: {data.btcBought.toLocaleString('en-US', { maximumFractionDigits: 8 })} BTC
+                            </p>
+                          ) : null}
+                        </div>
+                      )
+                    }
+                    return null
+                  }}
+                />
+                <Area type="monotone" dataKey="btcPrice" stroke="#f97316" strokeWidth={2} fillOpacity={1} fill="url(#colorBtc)" dot={false} />
+                <Scatter dataKey="purchasePrice" fill="#fbbf24">
+                  {mergedData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.purchasePrice ? '#fbbf24' : 'transparent'} />
+                  ))}
+                </Scatter>
+              </ComposedChart>
+            )}
+          </ResponsiveContainer>
+        )}
       </div>
     </div>
   )
