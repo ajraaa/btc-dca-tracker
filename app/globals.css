@@ -24,3 +24,9 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* Date picker icon color - orange-500 (#f97316) */
+input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: brightness(0) saturate(100%) invert(52%) sepia(78%) saturate(2476%) hue-rotate(2deg) brightness(104%) contrast(97%);
+  cursor: pointer;
+}
