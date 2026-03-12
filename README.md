@@ -10,6 +10,8 @@ Aplikasi sederhana untuk memantau investasi Bitcoin dengan metode *Dollar Cost A
 * **Authentication**: Sistem login menggunakan Supabase Auth.
 * **Pagination**: Pembatasan jumlah data per halaman agar tabel tetap rapi.
 * **Data Integrity**: Validasi input angka 0, negatif, atau tanggal masa depan. Baik di sisi Frontend maupun Database.
+* **Distribusi Modal**: Visualisasi komposisi investasi kamu (jumlah setiap transaksi) dalam grafik batang interaktif untuk melihat apakah portofolio DCA-mu seimbang.
+* **Titik Akumulasi**: Tampilkan riwayat pembelian di sepanjang garis waktu harga BTC, sehingga kamu bisa melihat kapan dan di mana kamu "mengakumulasi" koin.
 
 ## 🛠️ Tech Stack
 
