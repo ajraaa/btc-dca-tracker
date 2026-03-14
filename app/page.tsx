@@ -202,6 +202,8 @@ export default function Dashboard() {
           <TransactionCharts
             mode={transactionView === 'bar' ? 'bar' : 'line'}
             transactions={allTransactions}
+            currency={currency}
+            usdRate={usdRate}
           />
         )}
       </div>

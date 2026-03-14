@@ -26,6 +26,8 @@ interface Transaction {
 interface Props {
   transactions: Transaction[]
   mode: 'bar' | 'line'
+  currency: 'IDR' | 'USD'
+  usdRate: number
 }
 
 interface BtcHistoryPoint {
@@ -35,7 +37,7 @@ interface BtcHistoryPoint {
   btcPrice: number
 }
 
-export default function TransactionCharts({ transactions, mode }: Props) {
+export default function TransactionCharts({ transactions, mode, currency }: Props) {
   const [btcHistory, setBtcHistory] = useState<BtcHistoryPoint[]>([])
   const [loadingHistory, setLoadingHistory] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
@@ -68,8 +70,9 @@ export default function TransactionCharts({ transactions, mode }: Props) {
       try {
         const firstDate = new Date(Math.min(...transactions.map(t => new Date(t.purchase_date).getTime())))
         const days = Math.max(1, Math.ceil((Date.now() - firstDate.getTime()) / (24 * 60 * 60 * 1000)))
+        const vsCurrency = currency.toLowerCase()
         
-        const res = await fetch(`https://api.coingecko.com/api/v3/coins/bitcoin/market_chart?vs_currency=idr&days=${days}`)
+        const res = await fetch(`https://api.coingecko.com/api/v3/coins/bitcoin/market_chart?vs_currency=${vsCurrency}&days=${days}`)
         const json = await res.json()
         
         const prices = json.prices.map(([ts, price]: [number, number]) => ({
@@ -86,7 +89,7 @@ export default function TransactionCharts({ transactions, mode }: Props) {
       }
     }
     loadHistory()
-  }, [transactions, mode])
+  }, [transactions, mode, currency])
 
   // 2. Data khusus untuk Bar Chart (Urut berdasarkan tanggal)
   const barData = useMemo(() => {
@@ -177,11 +180,14 @@ export default function TransactionCharts({ transactions, mode }: Props) {
                 content={({ active, payload, label }: any) => {
                   if (active && payload && payload.length) {
                     const data = payload[0].payload
+                    const priceFormatted = currency === 'IDR'
+                      ? `Rp ${Math.round(data.btcPrice || 0).toLocaleString('id-ID')}`
+                      : `$ ${Math.round(data.btcPrice || 0).toLocaleString('en-US')}`
                     return (
                       <div style={{ backgroundColor: '#0f172a', border: '1px solid #1e293b', borderRadius: '8px', padding: '10px', fontSize: '11px' }}>
                         <p style={{ color: '#94a3b8', margin: '0 0 6px 0' }}>{label}</p>
                         <p style={{ color: '#e2e8f0', margin: 0 }}>
-                          Harga Market: Rp {Math.round(data.btcPrice || 0).toLocaleString('id-ID')}
+                          Harga Market: {priceFormatted}
                         </p>
                         {data.purchasePrice && data.btcBought ? (
                           <p style={{ color: '#fbbf24', margin: '6px 0 0 0' }}>
@@ -236,11 +242,14 @@ export default function TransactionCharts({ transactions, mode }: Props) {
                   content={({ active, payload, label }: any) => {
                     if (active && payload && payload.length) {
                       const data = payload[0].payload
+                      const priceFormatted = currency === 'IDR'
+                        ? `Rp ${Math.round(data.btcPrice || 0).toLocaleString('id-ID')}`
+                        : `$ ${Math.round(data.btcPrice || 0).toLocaleString('en-US')}`
                       return (
                         <div style={{ backgroundColor: '#0f172a', border: '1px solid #1e293b', borderRadius: '8px', padding: '10px', fontSize: '11px' }}>
                           <p style={{ color: '#94a3b8', margin: '0 0 6px 0' }}>{label}</p>
                           <p style={{ color: '#e2e8f0', margin: 0 }}>
-                            Harga Market: Rp {Math.round(data.btcPrice || 0).toLocaleString('id-ID')}
+                            Harga Market: {priceFormatted}
                           </p>
                           {data.purchasePrice && data.btcBought ? (
                             <p style={{ color: '#fbbf24', margin: '6px 0 0 0' }}>
