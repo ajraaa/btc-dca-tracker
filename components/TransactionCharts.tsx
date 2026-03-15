@@ -185,7 +185,7 @@ export default function TransactionCharts({ transactions, mode, currency }: Prop
                       : `$ ${Math.round(data.btcPrice || 0).toLocaleString('en-US')}`
                     return (
                       <div style={{ backgroundColor: '#0f172a', border: '1px solid #1e293b', borderRadius: '8px', padding: '10px', fontSize: '11px' }}>
-                        <p style={{ color: '#94a3b8', margin: '0 0 6px 0' }}>{label}</p>
+                        <p style={{ color: '#94a3b8', margin: '0 0 6px 0' }}>{new Date(data.isoDate).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })}</p>
                         <p style={{ color: '#e2e8f0', margin: 0 }}>
                           Harga Market: {priceFormatted}
                         </p>
@@ -247,7 +247,7 @@ export default function TransactionCharts({ transactions, mode, currency }: Prop
                         : `$ ${Math.round(data.btcPrice || 0).toLocaleString('en-US')}`
                       return (
                         <div style={{ backgroundColor: '#0f172a', border: '1px solid #1e293b', borderRadius: '8px', padding: '10px', fontSize: '11px' }}>
-                          <p style={{ color: '#94a3b8', margin: '0 0 6px 0' }}>{label}</p>
+                          <p style={{ color: '#94a3b8', margin: '0 0 6px 0' }}>{new Date(data.isoDate).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })}</p>
                           <p style={{ color: '#e2e8f0', margin: 0 }}>
                             Harga Market: {priceFormatted}
                           </p>
