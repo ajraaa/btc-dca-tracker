@@ -73,7 +73,7 @@ export default function SummaryCards({ totalModal, totalBtc, currentPrice, usdRa
         </button>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-5 gap-4">
         <div className="bg-gray-800 p-5 rounded-xl border border-gray-700">
           <p className="text-gray-400 text-xs font-bold uppercase tracking-wider">Total Modal</p>
           <p className="text-xl font-bold mt-1">{show(formatValue(displayModal))}</p>
@@ -98,7 +98,7 @@ export default function SummaryCards({ totalModal, totalBtc, currentPrice, usdRa
           <p className="text-xl font-bold mt-1">{show(formatValue(currentValue))}</p>
         </div>
 
-        <div className="bg-gray-800 p-5 rounded-xl border border-gray-700">
+        <div className="col-span-2 sm:col-span-1 bg-gray-800 p-5 rounded-xl border border-gray-700">
           <p className="text-gray-400 text-xs font-bold uppercase tracking-wider">Profit / Loss</p>
           <div className="flex items-baseline gap-2 mt-1">
             {visible ? (
