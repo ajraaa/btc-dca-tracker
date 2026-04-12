@@ -73,45 +73,45 @@ export default function SummaryCards({ totalModal, totalBtc, currentPrice, usdRa
         </button>
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-        <div className="bg-gray-800 p-5 rounded-xl border border-gray-700">
-          <p className="text-gray-400 text-xs font-bold uppercase tracking-wider">Total Modal</p>
-          <p className="text-xl font-bold mt-1">{show(formatValue(displayModal))}</p>
+      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-5 gap-2 sm:gap-4">
+        <div className="bg-gray-800 p-3 sm:p-5 rounded-xl border border-gray-700">
+          <p className="text-gray-400 text-[10px] sm:text-xs font-bold uppercase tracking-wider">Total Modal</p>
+          <p className="text-sm sm:text-xl font-bold mt-1">{show(formatValue(displayModal))}</p>
         </div>
 
-        <div className="bg-gray-800 p-5 rounded-xl border border-gray-700">
-          <p className="text-gray-400 text-xs font-bold uppercase tracking-wider">Aset BTC</p>
-          <p className="text-xl font-bold mt-1 text-orange-400">
+        <div className="bg-gray-800 p-3 sm:p-5 rounded-xl border border-gray-700">
+          <p className="text-gray-400 text-[10px] sm:text-xs font-bold uppercase tracking-wider">Aset BTC</p>
+          <p className="text-sm sm:text-xl font-bold mt-1 text-orange-400">
             {visible ? (
-              <>{totalBtc.toFixed(8)} <span className="text-[10px] text-gray-500">BTC</span></>
+              <>{totalBtc.toFixed(8)} <span className="text-[8px] sm:text-[10px] text-gray-500">BTC</span></>
             ) : HIDDEN_VALUE}
           </p>
         </div>
 
-        <div className="bg-gray-800 p-5 rounded-xl border border-gray-700">
-          <p className="text-gray-400 text-xs font-bold uppercase tracking-wider">Harga Rata-rata</p>
-          <p className="text-xl font-bold mt-1 text-orange-400">{show(formatValue(avgPrice))}</p>
+        <div className="bg-gray-800 p-3 sm:p-5 rounded-xl border border-gray-700">
+          <p className="text-gray-400 text-[10px] sm:text-xs font-bold uppercase tracking-wider">Harga Rata-rata</p>
+          <p className="text-sm sm:text-xl font-bold mt-1 text-orange-400">{show(formatValue(avgPrice))}</p>
         </div>
 
-        <div className="bg-gray-800 p-5 rounded-xl border border-gray-700">
-          <p className="text-gray-400 text-xs font-bold uppercase tracking-wider">Nilai Saat Ini</p>
-          <p className="text-xl font-bold mt-1">{show(formatValue(currentValue))}</p>
+        <div className="bg-gray-800 p-3 sm:p-5 rounded-xl border border-gray-700">
+          <p className="text-gray-400 text-[10px] sm:text-xs font-bold uppercase tracking-wider">Nilai Saat Ini</p>
+          <p className="text-sm sm:text-xl font-bold mt-1">{show(formatValue(currentValue))}</p>
         </div>
 
-        <div className="col-span-2 sm:col-span-1 bg-gray-800 p-5 rounded-xl border border-gray-700">
-          <p className="text-gray-400 text-xs font-bold uppercase tracking-wider">Profit / Loss</p>
+        <div className="col-span-2 sm:col-span-1 bg-gray-800 p-3 sm:p-5 rounded-xl border border-gray-700">
+          <p className="text-gray-400 text-[10px] sm:text-xs font-bold uppercase tracking-wider">Profit / Loss</p>
           <div className="flex items-baseline gap-2 mt-1">
             {visible ? (
               <>
-                <p className={`text-xl font-bold ${pnlNominal >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                <p className={`text-sm sm:text-xl font-bold ${pnlNominal >= 0 ? 'text-green-400' : 'text-red-400'}`}>
                   {pnlPercentage >= 0 ? '+' : ''}{pnlPercentage.toFixed(2)}%
                 </p>
-                <p className="text-xs text-gray-500">
+                <p className="text-[10px] sm:text-xs text-gray-500">
                   ({pnlNominal >= 0 ? '+' : ''}{formatValue(pnlNominal)})
                 </p>
               </>
             ) : (
-              <p className="text-xl font-bold text-gray-500">{HIDDEN_VALUE}</p>
+              <p className="text-sm sm:text-xl font-bold text-gray-500">{HIDDEN_VALUE}</p>
             )}
           </div>
         </div>
