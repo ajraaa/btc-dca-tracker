@@ -76,7 +76,7 @@ export default function TransactionCharts({ transactions, mode, currency }: Prop
         const days = Math.max(1, Math.ceil((Date.now() - firstDate.getTime()) / (24 * 60 * 60 * 1000)))
         const vsCurrency = currency.toLowerCase()
         
-        const res = await fetch(`https://api.coingecko.com/api/v3/coins/bitcoin/market_chart?vs_currency=${vsCurrency}&days=${days}`)
+        const res = await fetch(`/api/history?vs_currency=${vsCurrency}&days=${days}`)
         const json = await res.json()
         
         const prices = json.prices.map(([ts, price]: [number, number]) => ({

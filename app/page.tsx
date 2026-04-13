@@ -55,7 +55,7 @@ export default function Dashboard() {
 
   const fetchPrice = useCallback(async () => {
     try {
-      const res = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=idr,usd')
+      const res = await fetch('/api/price')
       const data = await res.json()
 
       if (!res.ok) {
