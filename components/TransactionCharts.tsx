@@ -13,6 +13,10 @@ import {
   Scatter,
   Cell,
 } from 'recharts'
+import { lttb } from './utility/lttb'
+
+/** Maximum number of non-purchase points to render in the line chart. */
+const LTTB_THRESHOLD = 500
 
 interface Transaction {
   id: string
@@ -103,7 +107,7 @@ export default function TransactionCharts({ transactions, mode, currency }: Prop
   }, [transactions])
 
   // 3. MERGE DATA: Untuk mode Line (Harga Market + Titik Beli)
-  const mergedData = useMemo(() => {
+  const mergedDataRaw = useMemo(() => {
     if (!btcHistory.length) return []
     const txMap = transactions.reduce((acc: Record<string, { fiat: number, btc: number }>, tx) => {
       const date = new Date(tx.purchase_date).toISOString().split('T')[0]
@@ -120,6 +124,23 @@ export default function TransactionCharts({ transactions, mode, currency }: Prop
       btcBought: txMap[point.isoDate]?.btc || null
     }))
   }, [btcHistory, transactions])
+
+  // 4. LTTB down-sampling – keeps purchase points, reduces market-only noise
+  const mergedData = useMemo(() => {
+    if (!mergedDataRaw.length) return []
+
+    const withLTTBFields = mergedDataRaw.map(p => ({
+      ...p,
+      x: p.ts,
+      y: p.btcPrice,
+      preserve: p.purchasePrice !== null,
+    }))
+
+    const downsampled = lttb(withLTTBFields, LTTB_THRESHOLD)
+
+    // Strip the helper fields before handing to Recharts
+    return downsampled.map(({ x, y, preserve, ...rest }) => rest)
+  }, [mergedDataRaw])
 
   const chartWidth = isMobile
     ? (mode === 'bar' 
