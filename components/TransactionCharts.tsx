@@ -79,13 +79,18 @@ export default function TransactionCharts({ transactions, mode, currency }: Prop
         const res = await fetch(`/api/history?vs_currency=${vsCurrency}&days=${days}`)
         const json = await res.json()
         
-        const prices = json.prices.map(([ts, price]: [number, number]) => ({
-          ts,
-          dateLabel: new Date(ts).toLocaleDateString('id-ID', { day: '2-digit', month: 'short' }),
-          isoDate: new Date(ts).toISOString().split('T')[0],
-          btcPrice: price
-        }))
-        setBtcHistory(prices)
+        const uniquePrices = new Map<string, BtcHistoryPoint>()
+        json.prices.forEach(([ts, price]: [number, number]) => {
+          const isoDate = new Date(ts).toISOString().split('T')[0]
+          // Menimpa nilai sebelumnya untuk tanggal yang sama agar tidak ada duplikasi data (menghindari double tooltip di hari yang sama)
+          uniquePrices.set(isoDate, {
+            ts,
+            dateLabel: new Date(ts).toLocaleDateString('id-ID', { day: '2-digit', month: 'short' }),
+            isoDate,
+            btcPrice: price
+          })
+        })
+        setBtcHistory(Array.from(uniquePrices.values()))
       } catch (err) {
         console.error('Gagal fetch harga:', err)
       } finally {
