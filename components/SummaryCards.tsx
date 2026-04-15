@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import NumberFlow from '@number-flow/react'
 
 interface SummaryProps {
   totalModal: number // Selalu dalam IDR dari database
@@ -48,16 +49,17 @@ export default function SummaryCards({ totalModal, totalBtc, currentPrice, usdRa
   
   // 4. Hitung PnL
   const pnlNominal = currentValue - displayModal
-  const pnlPercentage = displayModal > 0 ? (pnlNominal / displayModal) * 100 : 0
+  const pnlPercentage = displayModal > 0 ? (pnlNominal / displayModal) : 0 // NumberFlow handles percentage conversion if style: 'percent' is used
 
-  const formatValue = (val: number) => {
-    return currency === 'IDR' 
-      ? `Rp ${Math.round(val).toLocaleString('id-ID')}`
-      : `$${val.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+  const formatOptions = {
+    style: 'currency' as const,
+    currency: currency,
+    currencyDisplay: 'narrowSymbol' as const,
+    minimumFractionDigits: currency === 'IDR' ? 0 : 2,
+    maximumFractionDigits: currency === 'IDR' ? 0 : 2
   }
 
-  /** Tampilkan nilai atau sembunyikan */
-  const show = (content: string) => visible ? content : HIDDEN_VALUE
+  const locale = currency === 'IDR' ? 'id-ID' : 'en-US'
 
   return (
     <div className="mb-8">
@@ -76,39 +78,75 @@ export default function SummaryCards({ totalModal, totalBtc, currentPrice, usdRa
       <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-5 gap-2 sm:gap-4">
         <div className="bg-gray-800 p-3 sm:p-5 rounded-xl border border-gray-700">
           <p className="text-gray-400 text-[10px] sm:text-xs font-bold uppercase tracking-wider">Total Modal</p>
-          <p className="text-sm sm:text-xl font-bold mt-1">{show(formatValue(displayModal))}</p>
+          <div className="text-sm sm:text-xl font-bold mt-1">
+            {visible ? (
+              <NumberFlow value={displayModal} format={formatOptions} locales={locale} />
+            ) : (
+              <span>{HIDDEN_VALUE}</span>
+            )}
+          </div>
         </div>
 
         <div className="bg-gray-800 p-3 sm:p-5 rounded-xl border border-gray-700">
           <p className="text-gray-400 text-[10px] sm:text-xs font-bold uppercase tracking-wider">Aset BTC</p>
-          <p className="text-sm sm:text-xl font-bold mt-1 text-orange-400">
+          <div className="text-sm sm:text-xl font-bold mt-1 text-orange-400 flex items-center gap-1">
             {visible ? (
-              <>{totalBtc.toFixed(8)} <span className="text-[8px] sm:text-[10px] text-gray-500">BTC</span></>
-            ) : HIDDEN_VALUE}
-          </p>
+              <>
+                <NumberFlow value={totalBtc} format={{ minimumFractionDigits: 8, maximumFractionDigits: 8 }} />
+                <span className="text-[8px] sm:text-[10px] text-gray-500 font-medium">BTC</span>
+              </>
+            ) : (
+              <span>{HIDDEN_VALUE}</span>
+            )}
+          </div>
         </div>
 
         <div className="bg-gray-800 p-3 sm:p-5 rounded-xl border border-gray-700">
           <p className="text-gray-400 text-[10px] sm:text-xs font-bold uppercase tracking-wider">Harga Rata-rata</p>
-          <p className="text-sm sm:text-xl font-bold mt-1 text-orange-400">{show(formatValue(avgPrice))}</p>
+          <div className="text-sm sm:text-xl font-bold mt-1 text-orange-400">
+            {visible ? (
+              <NumberFlow value={avgPrice} format={formatOptions} locales={locale} />
+            ) : (
+              <span>{HIDDEN_VALUE}</span>
+            )}
+          </div>
         </div>
 
         <div className="bg-gray-800 p-3 sm:p-5 rounded-xl border border-gray-700">
           <p className="text-gray-400 text-[10px] sm:text-xs font-bold uppercase tracking-wider">Nilai Saat Ini</p>
-          <p className="text-sm sm:text-xl font-bold mt-1">{show(formatValue(currentValue))}</p>
+          <div className="text-sm sm:text-xl font-bold mt-1">
+            {visible ? (
+              <NumberFlow value={currentValue} format={formatOptions} locales={locale} />
+            ) : (
+              <span>{HIDDEN_VALUE}</span>
+            )}
+          </div>
         </div>
 
         <div className="col-span-2 sm:col-span-1 bg-gray-800 p-3 sm:p-5 rounded-xl border border-gray-700">
           <p className="text-gray-400 text-[10px] sm:text-xs font-bold uppercase tracking-wider">Profit / Loss</p>
-          <div className="flex items-baseline gap-2 mt-1">
+          <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0 mt-1">
             {visible ? (
               <>
-                <p className={`text-sm sm:text-xl font-bold ${pnlNominal >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                  {pnlPercentage >= 0 ? '+' : ''}{pnlPercentage.toFixed(2)}%
-                </p>
-                <p className="text-[10px] sm:text-xs text-gray-500">
-                  ({pnlNominal >= 0 ? '+' : ''}{formatValue(pnlNominal)})
-                </p>
+                <NumberFlow 
+                  value={pnlPercentage} 
+                  format={{ 
+                    style: 'percent' as const, 
+                    minimumFractionDigits: 2, 
+                    maximumFractionDigits: 2,
+                    signDisplay: 'always' as const
+                  }} 
+                  className={`text-sm sm:text-xl font-bold ${pnlPercentage >= 0 ? 'text-green-400' : 'text-red-400'}`}
+                />
+                <div className="text-[10px] sm:text-xs text-gray-500 flex items-center">
+                  <span>(</span>
+                  <NumberFlow 
+                    value={pnlNominal} 
+                    format={{...formatOptions, signDisplay: 'always' as const}} 
+                    locales={locale}
+                  />
+                  <span>)</span>
+                </div>
               </>
             ) : (
               <p className="text-sm sm:text-xl font-bold text-gray-500">{HIDDEN_VALUE}</p>
