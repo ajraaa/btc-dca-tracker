@@ -1,5 +1,6 @@
 'use client'
 import { useEffect, useState, useCallback } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { supabase } from '@/lib/supabase'
 import { User } from '@supabase/supabase-js'
 import { useRouter } from 'next/navigation'
@@ -148,8 +149,19 @@ export default function Dashboard() {
                 <button 
                   key={curr} 
                   onClick={() => setCurrency(curr)}
-                  className={`px-3 py-1 rounded-md text-xs font-bold transition-all ${currency === curr ? 'bg-orange-500 text-white' : 'text-gray-500'}`}
-                >{curr}</button>
+                  className={`relative px-3 py-1 rounded-md text-xs font-bold transition-colors ${
+                    currency === curr ? 'text-white' : 'text-gray-500 hover:text-gray-300'
+                  }`}
+                >
+                  {currency === curr && (
+                    <motion.div
+                      layoutId="currency-active"
+                      className="absolute inset-0 bg-orange-500 rounded-md"
+                      transition={{ type: "spring", bounce: 0.25, duration: 0.5 }}
+                    />
+                  )}
+                  <span className="relative z-10">{curr}</span>
+                </button>
               ))}
             </div>
           </div>
@@ -183,35 +195,54 @@ export default function Dashboard() {
                 key={view}
                 type="button"
                 onClick={() => setTransactionView(view)}
-                className={`px-3 py-1 rounded-full transition-all ${
+                className={`relative px-3 py-1 rounded-full transition-colors ${
                   transactionView === view
-                    ? 'bg-orange-500 text-white'
+                    ? 'text-white'
                     : 'text-gray-400 hover:text-gray-200'
                 }`}
               >
-                {view === 'table' ? 'Tabel' : view === 'bar' ? 'Bar Chart' : 'Line Chart'}
+                {transactionView === view && (
+                  <motion.div
+                    layoutId="view-active"
+                    className="absolute inset-0 bg-orange-500 rounded-full"
+                    transition={{ type: "spring", bounce: 0.25, duration: 0.5 }}
+                  />
+                )}
+                <span className="relative z-10">
+                  {view === 'table' ? 'Tabel' : view === 'bar' ? 'Bar Chart' : 'Line Chart'}
+                </span>
               </button>
             ))}
           </div>
         </div>
 
-        {transactionView === 'table' ? (
-          <TransactionTable
-            transactions={transactions}
-            onUpdate={() => fetchData(user!.id, currentPage)}
-            currentPage={currentPage}
-            totalCount={totalCount}
-            itemsPerPage={itemsPerPage}
-            onPageChange={handlePageChange}
-          />
-        ) : (
-          <TransactionCharts
-            mode={transactionView === 'bar' ? 'bar' : 'line'}
-            transactions={allTransactions}
-            currency={currency}
-            usdRate={usdRate}
-          />
-        )}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={transactionView}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.2 }}
+          >
+            {transactionView === 'table' ? (
+              <TransactionTable
+                transactions={transactions}
+                onUpdate={() => fetchData(user!.id, currentPage)}
+                currentPage={currentPage}
+                totalCount={totalCount}
+                itemsPerPage={itemsPerPage}
+                onPageChange={handlePageChange}
+              />
+            ) : (
+              <TransactionCharts
+                mode={transactionView === 'bar' ? 'bar' : 'line'}
+                transactions={allTransactions}
+                currency={currency}
+                usdRate={usdRate}
+              />
+            )}
+          </motion.div>
+        </AnimatePresence>
       </div>
 
       {isAddTransactionOpen && (
