@@ -30,3 +30,8 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   filter: brightness(0) saturate(100%) invert(52%) sepia(78%) saturate(2476%) hue-rotate(2deg) brightness(104%) contrast(97%);
   cursor: pointer;
 }
+
+@keyframes price-progress {
+  from { width: 0%; }
+  to { width: 100%; }
+}

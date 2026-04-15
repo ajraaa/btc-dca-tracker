@@ -7,6 +7,8 @@ import TransactionForm from '@/components/TransactionForm'
 import SummaryCards from '@/components/SummaryCards'
 import TransactionTable from '@/components/TransactionTable'
 import TransactionCharts from '../components/TransactionCharts'
+import RefreshProgressBar from '@/components/RefreshProgressBar'
+
 
 // Interface tetap sama
 interface Transaction {
@@ -30,6 +32,7 @@ export default function Dashboard() {
   const [isAddTransactionOpen, setIsAddTransactionOpen] = useState(false)
   const [allTransactions, setAllTransactions] = useState<Transaction[]>([])
   const [transactionView, setTransactionView] = useState<'table' | 'bar' | 'line'>('table')
+  const [refreshKey, setRefreshKey] = useState(0)
   const itemsPerPage = 10
 
   const fetchData = useCallback(async (userId: string, page: number = 1) => {
@@ -69,6 +72,7 @@ export default function Dashboard() {
         setPrices({ idr, usd })
         setUsdRate(idr / usd)
         setLastUpdated(new Date().toLocaleTimeString())
+        setRefreshKey(prev => prev + 1)
       }
     } catch {
       // Gagal fetch (network/parse): pertahankan harga terakhir, tidak tampilkan error overlay
@@ -120,7 +124,9 @@ export default function Dashboard() {
   }
 
   return (
-    <main className="p-4 md:p-10 text-white bg-gray-950 min-h-screen">
+    <main className="p-4 md:p-10 text-white bg-gray-950 min-h-screen relative">
+      <RefreshProgressBar intervalMs={30000} key={refreshKey} />
+
       {/* Header & SummaryCards tetap sama */}
       <header className="flex justify-between items-center mb-10 border-b border-gray-800 pb-6">
         <div>
