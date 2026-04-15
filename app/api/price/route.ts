@@ -7,7 +7,7 @@ export async function GET() {
   try {
     const res = await fetch(COINGECKO_URL, {
       headers: { Accept: 'application/json' },
-      // Revalidate every 15 seconds so the edge/server caches the result
+      // Revalidate every 30 seconds so the edge/server caches the result
       // and multiple clients won't each trigger a CoinGecko request.
       next: { revalidate: 30 },
     })
