@@ -15,6 +15,8 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "BTC DCA Tracker",
   description: "Track your DCA.",
+  themeColor: '#030712',
+  viewport: 'width=device-width, initial-scale=1, viewport-fit=cover',
 };
 
 export const viewport: Viewport = {
