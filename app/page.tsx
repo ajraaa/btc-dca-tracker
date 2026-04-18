@@ -9,7 +9,8 @@ import SummaryCards from '@/components/SummaryCards'
 import TransactionTable from '@/components/TransactionTable'
 import TransactionCharts from '../components/TransactionCharts'
 import RefreshProgressBar from '@/components/RefreshProgressBar'
-
+import SharePnLCard from '@/components/SharePnlCard'
+import { toPng } from 'html-to-image'
 
 // Interface tetap sama
 interface Transaction {
@@ -115,6 +116,21 @@ export default function Dashboard() {
 
   // EFFECT PAGINATION DIHAPUS karena sudah ditangani handlePageChange
 
+  const handleShare = useCallback(async () => {
+    const node = document.getElementById('share-pnl-card')
+    if (node) {
+      try {
+        const dataUrl = await toPng(node, { cacheBust: true })
+        const link = document.createElement('a')
+        link.download = `pnl-share-${new Date().getTime()}.png`
+        link.href = dataUrl
+        link.click()
+      } catch (err) {
+        console.error('Failed to generate image', err)
+      }
+    }
+  }, [])
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-950 flex flex-col items-center justify-center text-white">
@@ -126,6 +142,13 @@ export default function Dashboard() {
 
   return (
     <main className="p-4 md:p-10 text-white bg-gray-950 min-h-screen relative">
+      <SharePnLCard 
+        id="share-pnl-card"
+        avgPrice={summary.total_btc > 0 ? (currency === 'IDR' ? summary.total_modal : summary.total_modal / usdRate) / summary.total_btc : 0}
+        currentPrice={currency === 'IDR' ? prices.idr : prices.usd}
+        currency={currency}
+        pnlPercentage={(currency === 'IDR' ? summary.total_modal : summary.total_modal / usdRate) > 0 ? (((summary.total_btc * (currency === 'IDR' ? prices.idr : prices.usd)) - (currency === 'IDR' ? summary.total_modal : (summary.total_modal / usdRate || 1))) / (currency === 'IDR' ? summary.total_modal : (summary.total_modal / usdRate || 1))) * 100 : 0}
+      />
       <RefreshProgressBar intervalMs={30000} key={refreshKey} />
 
       {/* Header & SummaryCards tetap sama */}
@@ -137,6 +160,21 @@ export default function Dashboard() {
         </div>
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-3">
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={handleShare}
+              className="px-2 py-2 md:px-4 bg-gray-800 hover:bg-gray-700 text-white text-xs font-bold rounded-lg shadow-md transition-all cursor-pointer"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="md:hidden">
+                <circle cx="18" cy="5" r="3"></circle>
+                <circle cx="6" cy="12" r="3"></circle>
+                <circle cx="18" cy="19" r="3"></circle>
+                <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+                <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+              </svg>
+              <span className="hidden md:inline">Share PnL</span>
+            </motion.button>
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
