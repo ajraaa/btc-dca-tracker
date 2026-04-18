@@ -122,12 +122,30 @@ export default function Dashboard() {
     if (node) {
       try {
         const dataUrl = await toPng(node, { cacheBust: true })
+        
+        // Cek apakah browser mendukung Web Share API untuk file
+        if (navigator.share && navigator.canShare) {
+          const res = await fetch(dataUrl)
+          const blob = await res.blob()
+          const file = new File([blob], `pnl-share-${new Date().getTime()}.png`, { type: 'image/png' })
+          
+          if (navigator.canShare({ files: [file] })) {
+            await navigator.share({
+              files: [file],
+              title: 'BTC Tracker PnL',
+              text: 'Check out my Bitcoin investment performance!',
+            })
+            return
+          }
+        }
+
+        // Fallback: Download file jika Share API tidak tersedia
         const link = document.createElement('a')
         link.download = `pnl-share-${new Date().getTime()}.png`
         link.href = dataUrl
         link.click()
       } catch (err) {
-        console.error('Failed to generate image', err)
+        console.error('Failed to share or generate image', err)
       }
     }
   }, [])
