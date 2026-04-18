@@ -11,6 +11,7 @@ import TransactionCharts from '../components/TransactionCharts'
 import RefreshProgressBar from '@/components/RefreshProgressBar'
 import SharePnLCard from '@/components/SharePnlCard'
 import { toPng } from 'html-to-image'
+import FAB from '@/components/FAB'
 
 // Interface tetap sama
 interface Transaction {
@@ -175,15 +176,6 @@ export default function Dashboard() {
               </svg>
               <span className="hidden md:inline">Share PnL</span>
             </motion.button>
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              onClick={() => setIsAddTransactionOpen(true)}
-              className="px-2 py-2 md:px-4 bg-orange-500 hover:bg-orange-600 text-white text-xs font-bold rounded-lg shadow-md transition-all cursor-pointer"
-            >
-              <span className="md:hidden text-lg leading-none">+</span>
-              <span className="hidden md:inline">Tambah Transaksi</span>
-            </motion.button>
             <div className="flex bg-gray-900 p-1 rounded-lg border border-gray-800">
               {(['IDR', 'USD'] as const).map((curr) => (
                 <button 
@@ -318,6 +310,12 @@ export default function Dashboard() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Floating Action Button */}
+      <FAB 
+        onClick={() => setIsAddTransactionOpen(true)} 
+        label="Tambah Transaksi" 
+      />
     </main>
   )
 }
