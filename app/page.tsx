@@ -179,21 +179,6 @@ export default function Dashboard() {
         </div>
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-3">
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              onClick={handleShare}
-              className="px-2 py-2 md:px-4 bg-gray-800 hover:bg-gray-700 text-white text-xs font-bold rounded-lg shadow-md transition-all cursor-pointer"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="md:hidden">
-                <circle cx="18" cy="5" r="3"></circle>
-                <circle cx="6" cy="12" r="3"></circle>
-                <circle cx="18" cy="19" r="3"></circle>
-                <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
-                <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
-              </svg>
-              <span className="hidden md:inline">Share PnL</span>
-            </motion.button>
             <div className="flex bg-gray-900 p-1 rounded-lg border border-gray-800">
               {(['IDR', 'USD'] as const).map((curr) => (
                 <button 
@@ -235,6 +220,7 @@ export default function Dashboard() {
         currentPrice={currency === 'IDR' ? prices.idr : prices.usd}
         usdRate={usdRate}
         currency={currency} 
+        onShare={handleShare}
       />
 
       <div className="mt-8">

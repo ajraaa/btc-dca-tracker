@@ -9,6 +9,7 @@ interface SummaryProps {
   currentPrice: number // Dinamis (bisa IDR atau USD harga BTC)
   usdRate: number
   currency: 'IDR' | 'USD'
+  onShare?: () => void
 }
 
 const HIDDEN_VALUE = '********'
@@ -35,7 +36,7 @@ function EyeOffIcon() {
   )
 }
 
-export default function SummaryCards({ totalModal, totalBtc, currentPrice, usdRate, currency }: SummaryProps) {
+export default function SummaryCards({ totalModal, totalBtc, currentPrice, usdRate, currency, onShare }: SummaryProps) {
   const [visible, setVisible] = useState(true)
 
   // 1. Hitung Modal sesuai mata uang
@@ -123,9 +124,24 @@ export default function SummaryCards({ totalModal, totalBtc, currentPrice, usdRa
           </div>
         </div>
 
-        <div className="col-span-2 sm:col-span-1 bg-gray-800 p-3 sm:p-5 rounded-xl border border-gray-700">
+        <div className="col-span-2 sm:col-span-1 bg-gray-800 p-3 sm:p-5 rounded-xl border border-gray-700 relative group">
           <p className="text-gray-400 text-[10px] sm:text-xs font-bold uppercase tracking-wider">Profit / Loss</p>
-          <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0 mt-1">
+          {onShare && (
+            <button 
+              onClick={(e) => { e.stopPropagation(); onShare(); }}
+              className="absolute top-2 right-2 sm:top-4 sm:right-4 p-1.5 hover:bg-gray-700 rounded-lg text-gray-400 hover:text-orange-400 transition-all cursor-pointer"
+              title="Share PnL"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="18" cy="5" r="3"></circle>
+                <circle cx="6" cy="12" r="3"></circle>
+                <circle cx="18" cy="19" r="3"></circle>
+                <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+                <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+              </svg>
+            </button>
+          )}
+          <div className="text-sm sm:text-xl font-bold mt-1 flex flex-wrap items-baseline gap-x-2 gap-y-0">
             {visible ? (
               <>
                 <NumberFlow 
@@ -136,9 +152,9 @@ export default function SummaryCards({ totalModal, totalBtc, currentPrice, usdRa
                     maximumFractionDigits: 2,
                     signDisplay: 'always' as const
                   }} 
-                  className={`text-sm sm:text-xl font-bold ${pnlPercentage >= 0 ? 'text-green-400' : 'text-red-400'}`}
+                  className={pnlPercentage >= 0 ? 'text-green-400' : 'text-red-400'}
                 />
-                <div className="text-[10px] sm:text-xs text-gray-500 flex items-center">
+                <div className="text-[10px] sm:text-xs text-gray-500 font-medium flex items-center">
                   <span>(</span>
                   <NumberFlow 
                     value={pnlNominal} 
@@ -149,7 +165,7 @@ export default function SummaryCards({ totalModal, totalBtc, currentPrice, usdRa
                 </div>
               </>
             ) : (
-              <p className="text-sm sm:text-xl font-bold text-gray-500">{HIDDEN_VALUE}</p>
+              <span className="text-gray-500">{HIDDEN_VALUE}</span>
             )}
           </div>
         </div>
