@@ -172,10 +172,13 @@ export default function Dashboard() {
 
       {/* Header & SummaryCards tetap sama */}
       <header className="flex justify-between items-center mb-10 border-b border-gray-800 pb-6">
-        <div>
+        <div className="flex flex-col justify-center">
           <p className="text-[10px] text-gray-500 italic">Harga diperbarui pada: {lastUpdated}</p>
-          <h1 className="text-3xl font-black text-orange-500 tracking-tighter italic uppercase">BTC Tracker</h1>
-          <p className="text-xs text-gray-500 mt-1">{user?.email}</p>
+          <h1 className="text-3xl font-black text-orange-500 tracking-tighter italic uppercase leading-none sm:leading-tight mt-0.5">
+            BTC<br className="sm:hidden" />
+            <span className="hidden sm:inline"> </span>Tracker
+          </h1>
+          <p className="text-xs text-gray-500 mt-0.5">{user?.email}</p>
         </div>
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-3">
