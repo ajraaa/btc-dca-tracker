@@ -14,7 +14,11 @@ export default function FAB({ onClick, label }: FABProps) {
       whileHover="hover"
       animate="rest"
       onClick={onClick}
-      className="fixed bottom-6 right-6 z-40 flex items-center bg-orange-500 hover:bg-orange-600 text-white rounded-full shadow-2xl overflow-hidden cursor-pointer h-14"
+      className="fixed bottom-6 right-6 z-40 flex items-center text-white rounded-full overflow-hidden cursor-pointer h-14"
+      style={{ 
+        background: 'var(--accent)',
+        boxShadow: '0 4px 20px rgba(249, 115, 22, 0.35)',
+      }}
     >
       <div className="flex items-center justify-center w-14 h-14 flex-shrink-0">
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">

@@ -84,15 +84,29 @@ export default function EditModal({ transaction, isOpen, onClose, onSuccess }: E
   }
 
   return (
-    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-gray-800 border border-gray-700 p-6 rounded-2xl w-full max-w-md shadow-2xl">
-        <h2 className="text-xl font-bold text-orange-500 mb-6 flex items-center gap-2">
-          <span>✏️</span> Edit Transaksi
+    <div 
+      className="fixed inset-0 flex items-center justify-center z-50 p-4"
+      style={{ background: 'var(--bg-overlay)', backdropFilter: 'blur(8px)' }}
+    >
+      <div className="card p-6 w-full max-w-md">
+        <h2 className="text-lg font-bold mb-6 flex items-center gap-2" style={{ color: 'var(--accent)' }}>
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+          </svg>
+          Edit Transaksi
         </h2>
 
       {/* TAMPILAN ERROR */}
       {errorMsg && (
-        <div className="mb-4 p-3 bg-red-500/20 border border-red-500 text-red-400 text-xs rounded-lg animate-pulse">
+        <div 
+          className="mb-4 p-3 text-xs rounded-xl animate-pulse"
+          style={{ 
+            background: 'var(--red-subtle)', 
+            border: '1px solid var(--red)',
+            color: 'var(--red)',
+          }}
+        >
           ⚠️ {errorMsg}
         </div>
       )}
@@ -100,7 +114,7 @@ export default function EditModal({ transaction, isOpen, onClose, onSuccess }: E
         <form onSubmit={handleUpdate} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1">Tanggal</label>
+              <label className="block text-[10px] font-semibold uppercase mb-1.5" style={{ color: 'var(--text-muted)' }}>Tanggal</label>
               <input 
                 type="date" 
                 value={date} 
@@ -114,32 +128,32 @@ export default function EditModal({ transaction, isOpen, onClose, onSuccess }: E
                     setDate(selectedDate);
                   }
                 }} 
-                className="w-full bg-gray-900 border border-gray-700 p-2 rounded text-sm outline-none focus:border-orange-500" />
+                className="input-field" />
             </div>
             <div>
-              <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1">Exchange</label>
-              <input type="text" value={exchange} onChange={(e) => setExchange(e.target.value)} className="w-full bg-gray-900 border border-gray-700 p-2 rounded text-sm outline-none focus:border-orange-500" />
+              <label className="block text-[10px] font-semibold uppercase mb-1.5" style={{ color: 'var(--text-muted)' }}>Exchange</label>
+              <input type="text" value={exchange} onChange={(e) => setExchange(e.target.value)} className="input-field" />
             </div>
           </div>
 
           <div>
-            <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1">Modal (IDR)</label>
-            <input type="number" min="1" value={fiatAmount} onChange={(e) => setFiatAmount(e.target.value)} className="w-full bg-gray-900 border border-gray-700 p-2 rounded text-sm outline-none focus:border-orange-500" />
+            <label className="block text-[10px] font-semibold uppercase mb-1.5" style={{ color: 'var(--text-muted)' }}>Modal (IDR)</label>
+            <input type="number" min="1" value={fiatAmount} onChange={(e) => setFiatAmount(e.target.value)} className="input-field" />
           </div>
 
           <div>
-            <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1">Jumlah BTC</label>
-            <input type="number" min="0.00000001" step="any" value={btcAmount} onChange={(e) => setBtcAmount(e.target.value)} className="w-full bg-gray-900 border border-gray-700 p-2 rounded text-sm outline-none focus:border-orange-500" />
+            <label className="block text-[10px] font-semibold uppercase mb-1.5" style={{ color: 'var(--text-muted)' }}>Jumlah BTC</label>
+            <input type="number" min="0.00000001" step="any" value={btcAmount} onChange={(e) => setBtcAmount(e.target.value)} className="input-field" />
           </div>
 
           <div>
-            <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1">Fee Transaksi (IDR)</label>
-            <input type="number" value={fee} onChange={(e) => setFee(e.target.value)} className="w-full bg-gray-900 border border-gray-700 p-2 rounded text-sm outline-none focus:border-orange-500" />
+            <label className="block text-[10px] font-semibold uppercase mb-1.5" style={{ color: 'var(--text-muted)' }}>Fee Transaksi (IDR)</label>
+            <input type="number" value={fee} onChange={(e) => setFee(e.target.value)} className="input-field" />
           </div>
 
           <div className="flex gap-3 mt-8">
-            <button type="button" onClick={onClose} className="flex-1 px-4 py-2.5 bg-gray-700 hover:bg-gray-600 rounded-xl text-xs font-bold transition-all">Batal</button>
-            <button type="submit" disabled={loading} className="flex-1 px-4 py-2.5 bg-orange-500 hover:bg-orange-600 rounded-xl text-xs font-bold transition-all disabled:opacity-50">
+            <button type="button" onClick={onClose} className="flex-1 btn-secondary text-xs">Batal</button>
+            <button type="submit" disabled={loading} className="flex-1 btn-primary text-xs">
               {loading ? 'Menyimpan...' : 'Simpan'}
             </button>
           </div>

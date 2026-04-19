@@ -41,12 +41,38 @@ interface BtcHistoryPoint {
   btcPrice: number
 }
 
+// Helper hook to read CSS variables at runtime
+function useCSSVar(varName: string, fallback: string = '') {
+  const [value, setValue] = useState(fallback)
+  useEffect(() => {
+    const read = () => {
+      const v = getComputedStyle(document.documentElement).getPropertyValue(varName).trim()
+      if (v) setValue(v)
+    }
+    read()
+    // Re-read on theme changes
+    const observer = new MutationObserver(read)
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] })
+    return () => observer.disconnect()
+  }, [varName])
+  return value
+}
+
 export default function TransactionCharts({ transactions, mode, currency }: Props) {
   const [btcHistory, setBtcHistory] = useState<BtcHistoryPoint[]>([])
   const [loadingHistory, setLoadingHistory] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
   const [containerWidth, setContainerWidth] = useState(800)
   const [isMobile, setIsMobile] = useState(false)
+
+  // Theme-aware colors
+  const chartGrid = useCSSVar('--chart-grid', '#1e2433')
+  const chartText = useCSSVar('--chart-text', '#6b7280')
+  const tooltipBg = useCSSVar('--tooltip-bg', '#1a1f2e')
+  const tooltipBorder = useCSSVar('--tooltip-border', '#232939')
+  const tooltipText = useCSSVar('--tooltip-text', '#f1f3f5')
+  const tooltipLabel = useCSSVar('--tooltip-label', '#9ca3af')
+  const accent = useCSSVar('--accent', '#f97316')
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768)
@@ -154,17 +180,92 @@ export default function TransactionCharts({ transactions, mode, currency }: Prop
     : containerWidth; // Full width on desktop, no scrolling
 
   if (mode === 'line' && loadingHistory) {
-    return <div className="h-72 flex items-center justify-center text-gray-500 text-xs">Menyelaraskan data pasar...</div>
+    return (
+      <div className="h-72 flex items-center justify-center text-xs" style={{ color: 'var(--text-muted)' }}>
+        Menyelaraskan data pasar...
+      </div>
+    )
+  }
+
+  // Shared chart configs
+  const barTooltipStyle = {
+    contentStyle: { backgroundColor: tooltipBg, border: `1px solid ${tooltipBorder}`, borderRadius: '12px', fontSize: '11px', boxShadow: '0 4px 16px rgba(0,0,0,0.15)' },
+    itemStyle: { color: tooltipText },
+    labelStyle: { color: tooltipLabel },
+  }
+
+  const renderBarChart = (width?: number, height?: number) => {
+    const props = width && height ? { width, height } : {}
+    return (
+      <BarChart {...props} data={barData} margin={{ top: 10, right: 10, left: 10, bottom: 20 }}>
+        <CartesianGrid strokeDasharray="3 3" stroke={chartGrid} vertical={false} />
+        <XAxis dataKey="dateLabel" tick={{ fontSize: 9, fill: chartText }} axisLine={false} tickLine={false} />
+        <YAxis tick={{ fontSize: 9, fill: chartText }} axisLine={false} tickLine={false} tickFormatter={(v) => `Rp ${v.toLocaleString('id-ID')}`} />
+        <Tooltip
+          {...barTooltipStyle}
+          formatter={(v: number | undefined) => [`Rp ${(v ?? 0).toLocaleString('id-ID')}`, 'Modal']}
+        />
+        <Bar dataKey="fiatAmount" fill={accent} radius={[6, 6, 0, 0]} />
+      </BarChart>
+    )
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const CustomTooltip = ({ active, payload, label }: any) => {
+    if (active && payload && payload.length) {
+      const data = payload[0].payload
+      const priceFormatted = currency === 'IDR'
+        ? `Rp ${Math.round(data.btcPrice || 0).toLocaleString('id-ID')}`
+        : `$ ${Math.round(data.btcPrice || 0).toLocaleString('en-US')}`
+      return (
+        <div style={{ backgroundColor: tooltipBg, border: `1px solid ${tooltipBorder}`, borderRadius: '12px', padding: '12px', fontSize: '11px', boxShadow: '0 4px 16px rgba(0,0,0,0.15)' }}>
+          <p style={{ color: tooltipLabel, margin: '0 0 6px 0' }}>{new Date(data.isoDate).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })}</p>
+          <p style={{ color: tooltipText, margin: 0 }}>
+            Harga Market: {priceFormatted}
+          </p>
+          {data.purchasePrice && data.btcBought ? (
+            <p style={{ color: '#fbbf24', margin: '6px 0 0 0' }}>
+              BTC Didapat: {data.btcBought.toLocaleString('en-US', { maximumFractionDigits: 8 })} BTC
+            </p>
+          ) : null}
+        </div>
+      )
+    }
+    return null
+  }
+
+  const renderLineChart = (width?: number, height?: number) => {
+    const props = width && height ? { width, height } : {}
+    return (
+      <ComposedChart {...props} data={mergedData} margin={{ top: 10, right: 10, left: 10, bottom: 20 }}>
+        <defs>
+          <linearGradient id="colorBtc" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="5%" stopColor={accent} stopOpacity={0.3}/>
+            <stop offset="95%" stopColor={accent} stopOpacity={0}/>
+          </linearGradient>
+        </defs>
+        <CartesianGrid strokeDasharray="3 3" stroke={chartGrid} vertical={false} />
+        <XAxis dataKey="dateLabel" tick={{ fontSize: 9, fill: '#fbbf24' }} minTickGap={30} axisLine={false} tickLine={false} />
+        <YAxis hide={true} domain={['auto', 'auto']} />
+        <Tooltip content={<CustomTooltip />} />
+        <Area type="monotone" dataKey="btcPrice" stroke={accent} strokeWidth={2} fillOpacity={1} fill="url(#colorBtc)" dot={false} />
+        <Scatter dataKey="purchasePrice" fill="#fbbf24">
+          {mergedData.map((entry, index) => (
+            <Cell key={`cell-${index}`} fill={entry.purchasePrice ? '#fbbf24' : 'transparent'} />
+          ))}
+        </Scatter>
+      </ComposedChart>
+    )
   }
 
   return (
-    <div className="bg-gray-900/50 rounded-xl border border-gray-800 p-6 shadow-2xl h-full">
+    <div className="card p-6 h-full">
       <div className="flex justify-between items-start mb-6">
         <div>
-          <h2 className="text-sm font-bold text-gray-100 tracking-tight uppercase">
+          <h2 className="text-sm font-bold tracking-tight uppercase" style={{ color: 'var(--text-primary)' }}>
             {mode === 'bar' ? 'Distribusi Modal' : 'Strategi Akumulasi'}
           </h2>
-          <p className="text-[10px] text-gray-500">
+          <p className="text-[10px]" style={{ color: 'var(--text-muted)' }}>
             {mode === 'bar' 
               ? 'Besaran Rupiah yang dialokasikan per transaksi' 
               : 'Titik kuning menunjukkan eksekusi DCA kamu terhadap harga pasar'}
@@ -175,127 +276,14 @@ export default function TransactionCharts({ transactions, mode, currency }: Prop
       <div className={`h-72 w-full ${isMobile ? 'overflow-x-auto overflow-y-hidden' : 'overflow-hidden'}`} ref={containerRef} style={{ scrollbarWidth: 'thin' }}>
         {isMobile ? (
           <div style={{ width: chartWidth, height: '100%' }}>
-            {mode === 'bar' ? (
-              /* --- RENDER BAR CHART --- */
-              <BarChart width={chartWidth} height={288} data={barData} margin={{ top: 10, right: 10, left: 10, bottom: 20 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#1f2937" vertical={false} />
-              <XAxis dataKey="dateLabel" tick={{ fontSize: 9, fill: '#4b5563' }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fontSize: 9, fill: '#4b5563' }} axisLine={false} tickLine={false} tickFormatter={(v) => `Rp ${v.toLocaleString('id-ID')}`} />
-              <Tooltip
-                contentStyle={{ backgroundColor: '#0f172a', border: '1px solid #1e293b', borderRadius: '8px', fontSize: '11px' }}
-                itemStyle={{ color: '#e2e8f0' }}
-                labelStyle={{ color: '#94a3b8' }}
-                formatter={(v: number | undefined) => [`Rp ${(v ?? 0).toLocaleString('id-ID')}`, 'Modal']}
-              />
-              <Bar dataKey="fiatAmount" fill="#f97316" radius={[4, 4, 0, 0]} />
-            </BarChart>
-            ) : (
-              /* --- RENDER LINE/AREA CHART (MICROSTRATEGY STYLE) --- */
-              <ComposedChart width={chartWidth} height={288} data={mergedData} margin={{ top: 10, right: 10, left: 10, bottom: 20 }}>
-              <defs>
-                <linearGradient id="colorBtc" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#f97316" stopOpacity={0.3}/>
-                  <stop offset="95%" stopColor="#f97316" stopOpacity={0}/>
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="#1f2937" vertical={false} />
-              <XAxis dataKey="dateLabel" tick={{ fontSize: 9, fill: '#fbbf24' }} minTickGap={30} axisLine={false} tickLine={false} />
-              <YAxis hide={true} domain={['auto', 'auto']} />
-              <Tooltip
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                content={({ active, payload, label }: any) => {
-                  if (active && payload && payload.length) {
-                    const data = payload[0].payload
-                    const priceFormatted = currency === 'IDR'
-                      ? `Rp ${Math.round(data.btcPrice || 0).toLocaleString('id-ID')}`
-                      : `$ ${Math.round(data.btcPrice || 0).toLocaleString('en-US')}`
-                    return (
-                      <div style={{ backgroundColor: '#0f172a', border: '1px solid #1e293b', borderRadius: '8px', padding: '10px', fontSize: '11px' }}>
-                        <p style={{ color: '#94a3b8', margin: '0 0 6px 0' }}>{new Date(data.isoDate).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })}</p>
-                        <p style={{ color: '#e2e8f0', margin: 0 }}>
-                          Harga Market: {priceFormatted}
-                        </p>
-                        {data.purchasePrice && data.btcBought ? (
-                          <p style={{ color: '#fbbf24', margin: '6px 0 0 0' }}>
-                            BTC Didapat: {data.btcBought.toLocaleString('en-US', { maximumFractionDigits: 8 })} BTC
-                          </p>
-                        ) : null}
-                      </div>
-                    )
-                  }
-                  return null
-                }}
-              />
-              <Area type="monotone" dataKey="btcPrice" stroke="#f97316" strokeWidth={2} fillOpacity={1} fill="url(#colorBtc)" dot={false} />
-              <Scatter dataKey="purchasePrice" fill="#fbbf24">
-                {mergedData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={entry.purchasePrice ? '#fbbf24' : 'transparent'} />
-                ))}
-                </Scatter>
-              </ComposedChart>
-            )}
+            {mode === 'bar' 
+              ? renderBarChart(chartWidth, 288)
+              : renderLineChart(chartWidth, 288)
+            }
           </div>
         ) : (
           <ResponsiveContainer width="100%" height="100%">
-            {mode === 'bar' ? (
-              /* --- RENDER BAR CHART (DESKTOP) --- */
-              <BarChart data={barData} margin={{ top: 10, right: 10, left: 10, bottom: 20 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#1f2937" vertical={false} />
-                <XAxis dataKey="dateLabel" tick={{ fontSize: 9, fill: '#4b5563' }} axisLine={false} tickLine={false} />
-                <YAxis tick={{ fontSize: 9, fill: '#4b5563' }} axisLine={false} tickLine={false} tickFormatter={(v) => `Rp ${v.toLocaleString('id-ID')}`} />
-                <Tooltip
-                  contentStyle={{ backgroundColor: '#0f172a', border: '1px solid #1e293b', borderRadius: '8px', fontSize: '11px' }}
-                  itemStyle={{ color: '#e2e8f0' }}
-                  labelStyle={{ color: '#94a3b8' }}
-                  formatter={(v: number | undefined) => [`Rp ${(v ?? 0).toLocaleString('id-ID')}`, 'Modal']}
-                />
-                <Bar dataKey="fiatAmount" fill="#f97316" radius={[4, 4, 0, 0]} />
-              </BarChart>
-            ) : (
-              /* --- RENDER LINE/AREA CHART (DESKTOP) --- */
-              <ComposedChart data={mergedData} margin={{ top: 10, right: 10, left: 10, bottom: 20 }}>
-                <defs>
-                  <linearGradient id="colorBtc" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#f97316" stopOpacity={0.3}/>
-                    <stop offset="95%" stopColor="#f97316" stopOpacity={0}/>
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="#1f2937" vertical={false} />
-                <XAxis dataKey="dateLabel" tick={{ fontSize: 9, fill: '#fbbf24' }} minTickGap={30} axisLine={false} tickLine={false} />
-                <YAxis hide={true} domain={['auto', 'auto']} />
-                <Tooltip
-                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                  content={({ active, payload, label }: any) => {
-                    if (active && payload && payload.length) {
-                      const data = payload[0].payload
-                      const priceFormatted = currency === 'IDR'
-                        ? `Rp ${Math.round(data.btcPrice || 0).toLocaleString('id-ID')}`
-                        : `$ ${Math.round(data.btcPrice || 0).toLocaleString('en-US')}`
-                      return (
-                        <div style={{ backgroundColor: '#0f172a', border: '1px solid #1e293b', borderRadius: '8px', padding: '10px', fontSize: '11px' }}>
-                          <p style={{ color: '#94a3b8', margin: '0 0 6px 0' }}>{new Date(data.isoDate).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })}</p>
-                          <p style={{ color: '#e2e8f0', margin: 0 }}>
-                            Harga Market: {priceFormatted}
-                          </p>
-                          {data.purchasePrice && data.btcBought ? (
-                            <p style={{ color: '#fbbf24', margin: '6px 0 0 0' }}>
-                              BTC Didapat: {data.btcBought.toLocaleString('en-US', { maximumFractionDigits: 8 })} BTC
-                            </p>
-                          ) : null}
-                        </div>
-                      )
-                    }
-                    return null
-                  }}
-                />
-                <Area type="monotone" dataKey="btcPrice" stroke="#f97316" strokeWidth={2} fillOpacity={1} fill="url(#colorBtc)" dot={false} />
-                <Scatter dataKey="purchasePrice" fill="#fbbf24">
-                  {mergedData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.purchasePrice ? '#fbbf24' : 'transparent'} />
-                  ))}
-                </Scatter>
-              </ComposedChart>
-            )}
+            {mode === 'bar' ? renderBarChart() : renderLineChart()}
           </ResponsiveContainer>
         )}
       </div>

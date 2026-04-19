@@ -80,14 +80,26 @@ export default function TransactionForm({ userId, onSuccess }: TransactionFormPr
   }
 
   return (
-    <form onSubmit={handleSubmit} className="bg-gray-800 p-6 rounded-xl shadow-lg border border-gray-700 w-full">
-      <h2 className="text-xl font-semibold mb-6 text-orange-500 flex items-center gap-2">
-        <span>➕</span> Tambah Transaksi DCA
+    <form onSubmit={handleSubmit} className="card p-6 w-full">
+      <h2 className="text-lg font-bold mb-6 flex items-center gap-2" style={{ color: 'var(--accent)' }}>
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="12" y1="8" x2="12" y2="16"/>
+          <line x1="8" y1="12" x2="16" y2="12"/>
+        </svg>
+        Tambah Transaksi DCA
       </h2>
 
       {/* TAMPILAN ERROR */}
       {errorMsg && (
-        <div className="mb-4 p-3 bg-red-500/20 border border-red-500 text-red-400 text-xs rounded-lg animate-pulse">
+        <div 
+          className="mb-4 p-3 text-xs rounded-xl animate-pulse"
+          style={{ 
+            background: 'var(--red-subtle)', 
+            border: '1px solid var(--red)',
+            color: 'var(--red)',
+          }}
+        >
           ⚠️ {errorMsg}
         </div>
       )}
@@ -95,7 +107,7 @@ export default function TransactionForm({ userId, onSuccess }: TransactionFormPr
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Baris 1: Tanggal & Exchange */}
         <div>
-          <label className="block text-xs font-semibold text-gray-400 uppercase mb-1">Tanggal Pembelian</label>
+          <label className="block text-xs font-semibold uppercase mb-1.5" style={{ color: 'var(--text-muted)' }}>Tanggal Pembelian</label>
           <input
             type="date"
             value={date}
@@ -109,36 +121,36 @@ export default function TransactionForm({ userId, onSuccess }: TransactionFormPr
                 setDate(selectedDate);
               }
             }}
-            className="w-full p-2.5 rounded bg-gray-900 border border-gray-700 focus:border-orange-500 outline-none text-sm"
+            className="input-field"
             required
           />
         </div>
         <div>
-          <label className="block text-xs font-semibold text-gray-400 uppercase mb-1">Exchange (Contoh: Indodax/Binance)</label>
+          <label className="block text-xs font-semibold uppercase mb-1.5" style={{ color: 'var(--text-muted)' }}>Exchange (Contoh: Indodax/Binance)</label>
           <input
             type="text"
             value={exchange}
             onChange={(e) => setExchange(e.target.value)}
             placeholder="Nama Exchange"
-            className="w-full p-2.5 rounded bg-gray-900 border border-gray-700 focus:border-orange-500 outline-none text-sm"
+            className="input-field"
           />
         </div>
 
         {/* Baris 2: Modal & Jumlah BTC */}
         <div>
-          <label className="block text-xs font-semibold text-gray-400 uppercase mb-1">Total Modal (IDR)</label>
+          <label className="block text-xs font-semibold uppercase mb-1.5" style={{ color: 'var(--text-muted)' }}>Total Modal (IDR)</label>
           <input
             type="number"
             min="1" // Browser-level validation
             value={fiatAmount}
             onChange={(e) => setFiatAmount(e.target.value)}
             placeholder="0"
-            className="w-full p-2.5 rounded bg-gray-900 border border-gray-700 focus:border-orange-500 outline-none text-sm"
+            className="input-field"
             required
           />
         </div>
         <div>
-          <label className="block text-xs font-semibold text-gray-400 uppercase mb-1">Jumlah BTC Didapat</label>
+          <label className="block text-xs font-semibold uppercase mb-1.5" style={{ color: 'var(--text-muted)' }}>Jumlah BTC Didapat</label>
           <input
             type="number"
             step="any"
@@ -146,19 +158,19 @@ export default function TransactionForm({ userId, onSuccess }: TransactionFormPr
             value={btcAmount}
             onChange={(e) => setBtcAmount(e.target.value)}
             placeholder="0.00000000"
-            className="w-full p-2.5 rounded bg-gray-900 border border-gray-700 focus:border-orange-500 outline-none text-sm"
+            className="input-field"
             required
           />
         </div>
 
         {/* Baris 3: Fee (Opsional) */}
         <div className="md:col-span-2">
-          <label className="block text-xs font-semibold text-gray-400 uppercase mb-1">Biaya Transaksi / Fee (IDR)</label>
+          <label className="block text-xs font-semibold uppercase mb-1.5" style={{ color: 'var(--text-muted)' }}>Biaya Transaksi / Fee (IDR)</label>
           <input
             type="number"
             value={fee}
             onChange={(e) => setFee(e.target.value)}
-            className="w-full p-2.5 rounded bg-gray-900 border border-gray-700 focus:border-orange-500 outline-none text-sm"
+            className="input-field"
           />
         </div>
       </div>
@@ -166,7 +178,7 @@ export default function TransactionForm({ userId, onSuccess }: TransactionFormPr
       <button
         type="submit"
         disabled={loading}
-        className="w-full mt-6 bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 px-4 rounded-lg transition-all transform active:scale-95 disabled:opacity-50"
+        className="w-full mt-6 btn-primary"
       >
         {loading ? 'Memproses...' : 'Simpan Transaksi'}
       </button>

@@ -49,31 +49,39 @@ export default function TransactionTable({
 
     if (transactions.length === 0) {
     return (
-      <div className="bg-gray-800 p-10 rounded-xl border border-dashed border-gray-700 text-center">
-        <p className="text-gray-500">Belum ada transaksi. Ayo mulai DCA!</p>
+      <div className="card p-10 text-center" style={{ borderStyle: 'dashed' }}>
+        <p style={{ color: 'var(--text-muted)' }}>Belum ada transaksi. Ayo mulai DCA!</p>
       </div>
     )
   }
 
   return (
     <>
-    <div className="bg-gray-800 rounded-xl border border-gray-700 overflow-hidden shadow-2xl">
+    <div className="card overflow-hidden">
       <div className="overflow-x-auto">
         <table className="w-full text-left text-sm">
-          <thead className="bg-gray-900/50 text-gray-400 uppercase text-[10px] tracking-widest font-bold">
-            <tr>
-              <th className="px-6 py-4">Tanggal</th>
-              <th className="px-6 py-4">Exchange</th>
-              <th className="px-6 py-4">Modal (IDR)</th>
-              <th className="px-6 py-4">BTC Didapat</th>
-              <th className="px-6 py-4">Fee</th>
-              <th className="px-6 py-4 text-center">Aksi</th>
+          <thead>
+            <tr style={{ background: 'var(--bg-elevated)' }}>
+              <th className="px-6 py-4 text-[10px] tracking-widest font-semibold uppercase" style={{ color: 'var(--text-muted)' }}>Tanggal</th>
+              <th className="px-6 py-4 text-[10px] tracking-widest font-semibold uppercase" style={{ color: 'var(--text-muted)' }}>Exchange</th>
+              <th className="px-6 py-4 text-[10px] tracking-widest font-semibold uppercase" style={{ color: 'var(--text-muted)' }}>Modal (IDR)</th>
+              <th className="px-6 py-4 text-[10px] tracking-widest font-semibold uppercase" style={{ color: 'var(--text-muted)' }}>BTC Didapat</th>
+              <th className="px-6 py-4 text-[10px] tracking-widest font-semibold uppercase" style={{ color: 'var(--text-muted)' }}>Fee</th>
+              <th className="px-6 py-4 text-[10px] tracking-widest font-semibold uppercase text-center" style={{ color: 'var(--text-muted)' }}>Aksi</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-700/50">
-            {transactions.map((tx) => (
-              <tr key={tx.id} className="hover:bg-gray-700/30 transition-all">
-                <td className="px-6 py-4 text-gray-300">
+          <tbody>
+            {transactions.map((tx, idx) => (
+              <tr 
+                key={tx.id} 
+                className="transition-colors"
+                style={{ 
+                  borderTop: '1px solid var(--border-subtle)',
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.background = 'var(--bg-hover)'}
+                onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+              >
+                <td className="px-6 py-4" style={{ color: 'var(--text-secondary)' }}>
                   {new Date(tx.purchase_date).toLocaleDateString('id-ID', {
                     day: 'numeric',
                     month: 'short',
@@ -81,39 +89,76 @@ export default function TransactionTable({
                   })}
                 </td>
                 <td className="px-6 py-4">
-                  <span className="bg-gray-900 px-2 py-1 rounded text-[11px] border border-gray-700">
+                  <span 
+                    className="px-2.5 py-1 rounded-lg text-[11px] font-medium"
+                    style={{ 
+                      background: 'var(--bg-elevated)', 
+                      border: '1px solid var(--border)',
+                      color: 'var(--text-secondary)'
+                    }}
+                  >
                     {tx.exchange_name || 'N/A'}
                   </span>
                 </td>
-                <td className="px-6 py-4 font-semibold">
+                <td className="px-6 py-4 font-semibold" style={{ color: 'var(--text-primary)' }}>
                   Rp {tx.fiat_amount.toLocaleString('id-ID')}
                 </td>
-                <td className="px-6 py-4 text-orange-400 font-mono">
+                <td className="px-6 py-4 font-mono" style={{ color: 'var(--accent)' }}>
                   {tx.btc_amount.toFixed(8)}
                 </td>
-                <td className="px-6 py-4 text-gray-500">
+                <td className="px-6 py-4" style={{ color: 'var(--text-muted)' }}>
                   Rp {tx.fee.toLocaleString('id-ID')}
                 </td>
                 <td className="px-6 py-4 text-center">
-                    <div className="flex justify-center gap-2">
+                    <div className="flex justify-center gap-1">
                         {/* Tombol Edit */}
                         <button 
-                        onClick={() => setSelectedTx(tx)}
-                        className="p-2 hover:bg-orange-500/20 rounded-lg transition-colors group"
+                          onClick={() => setSelectedTx(tx)}
+                          className="p-2 rounded-lg transition-colors cursor-pointer"
+                          style={{ color: 'var(--text-muted)' }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.background = 'var(--accent-subtle)'
+                            e.currentTarget.style.color = 'var(--accent)'
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.background = 'transparent'
+                            e.currentTarget.style.color = 'var(--text-muted)'
+                          }}
+                          title="Edit"
                         >
-                        <span className="text-orange-500 group-hover:scale-110 inline-block">✏️</span>
+                          <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                          </svg>
                         </button>
 
                         {/* Tombol Hapus */}
                         <button 
-                        onClick={() => handleDelete(tx.id)}
-                        disabled={isDeleting === tx.id}
-                        className="p-2 hover:bg-red-500/20 rounded-lg transition-colors disabled:opacity-50"
-                        title="Hapus">
-                        <span className={`${isDeleting === tx.id ? 'animate-pulse' : ''}`}>
-                          {isDeleting === tx.id ? '⏳' : '🗑️'}
-                        </span>
-                      </button>
+                          onClick={() => handleDelete(tx.id)}
+                          disabled={isDeleting === tx.id}
+                          className="p-2 rounded-lg transition-colors disabled:opacity-50 cursor-pointer"
+                          style={{ color: 'var(--text-muted)' }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.background = 'var(--red-subtle)'
+                            e.currentTarget.style.color = 'var(--red)'
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.background = 'transparent'
+                            e.currentTarget.style.color = 'var(--text-muted)'
+                          }}
+                          title="Hapus"
+                        >
+                          {isDeleting === tx.id ? (
+                            <div className="w-[15px] h-[15px] border-2 rounded-full animate-spin" style={{ borderColor: 'var(--red)', borderTopColor: 'transparent' }} />
+                          ) : (
+                            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <polyline points="3 6 5 6 21 6"/>
+                              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                              <line x1="10" y1="11" x2="10" y2="17"/>
+                              <line x1="14" y1="11" x2="14" y2="17"/>
+                            </svg>
+                          )}
+                        </button>
                       </div>
                 </td>
               </tr>
@@ -124,28 +169,45 @@ export default function TransactionTable({
     </div>
 
     {/* KONTROL PAGINATION */}
-      <div className="flex items-center justify-between px-2 text-xs">
-        <p className="text-gray-500">
-          Menampilkan <span className="text-gray-300 font-bold">{transactions.length}</span> dari <span className="text-gray-300 font-bold">{totalCount}</span> transaksi
+      <div className="flex items-center justify-between px-1 py-3 text-xs">
+        <p style={{ color: 'var(--text-muted)' }}>
+          Menampilkan <span className="font-bold" style={{ color: 'var(--text-secondary)' }}>{transactions.length}</span> dari <span className="font-bold" style={{ color: 'var(--text-secondary)' }}>{totalCount}</span> transaksi
         </p>
         
         <div className="flex gap-2">
           <button 
             disabled={currentPage === 1}
             onClick={() => onPageChange(currentPage - 1)}
-            className="px-3 py-1.5 bg-gray-900 border border-gray-700 rounded-lg hover:bg-gray-800 disabled:opacity-30 transition-all"
+            className="px-3 py-1.5 rounded-lg transition-all disabled:opacity-30 cursor-pointer text-xs font-medium"
+            style={{ 
+              background: 'var(--bg-card)',
+              border: '1px solid var(--border)',
+              color: 'var(--text-secondary)',
+            }}
           >
             ← Prev
           </button>
           
-          <div className="flex items-center px-4 bg-gray-900 border border-gray-700 rounded-lg font-bold text-orange-500">
+          <div 
+            className="flex items-center px-4 rounded-lg font-bold text-xs"
+            style={{ 
+              background: 'var(--accent-subtle)',
+              border: '1px solid var(--border)',
+              color: 'var(--accent)',
+            }}
+          >
             {currentPage} / {totalPages || 1}
           </div>
 
           <button 
             disabled={currentPage >= totalPages}
             onClick={() => onPageChange(currentPage + 1)}
-            className="px-3 py-1.5 bg-gray-900 border border-gray-700 rounded-lg hover:bg-gray-800 disabled:opacity-30 transition-all"
+            className="px-3 py-1.5 rounded-lg transition-all disabled:opacity-30 cursor-pointer text-xs font-medium"
+            style={{ 
+              background: 'var(--bg-card)',
+              border: '1px solid var(--border)',
+              color: 'var(--text-secondary)',
+            }}
           >
             Next →
           </button>

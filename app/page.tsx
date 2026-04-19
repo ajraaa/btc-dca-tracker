@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { supabase } from '@/lib/supabase'
 import { User } from '@supabase/supabase-js'
 import { useRouter } from 'next/navigation'
+import { useTheme } from '@/components/ThemeProvider'
 import TransactionForm from '@/components/TransactionForm'
 import SummaryCards from '@/components/SummaryCards'
 import TransactionTable from '@/components/TransactionTable'
@@ -20,8 +21,34 @@ interface Transaction {
 }
 interface SummaryData { total_modal: number; total_btc: number; }
 
+// Theme toggle icon components
+function SunIcon() {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="5" />
+      <line x1="12" y1="1" x2="12" y2="3" />
+      <line x1="12" y1="21" x2="12" y2="23" />
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+      <line x1="1" y1="12" x2="3" y2="12" />
+      <line x1="21" y1="12" x2="23" y2="12" />
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+    </svg>
+  )
+}
+
+function MoonIcon() {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+    </svg>
+  )
+}
+
 export default function Dashboard() {
   const router = useRouter()
+  const { theme, toggleTheme } = useTheme()
   const [user, setUser] = useState<User | null>(null)
   const [transactions, setTransactions] = useState<Transaction[]>([])
   const [summary, setSummary] = useState<SummaryData>({ total_modal: 0, total_btc: 0 })
@@ -152,15 +179,15 @@ export default function Dashboard() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-950 flex flex-col items-center justify-center text-white">
-        <div className="w-10 h-10 border-4 border-orange-500 border-t-transparent rounded-full animate-spin mb-4"></div>
-        <p className="text-gray-400 font-medium">Sinkronisasi data...</p>
+      <div className="min-h-screen flex flex-col items-center justify-center" style={{ background: 'var(--bg)', color: 'var(--text-primary)' }}>
+        <div className="w-10 h-10 border-4 rounded-full animate-spin mb-4" style={{ borderColor: 'var(--accent)', borderTopColor: 'transparent' }}></div>
+        <p className="font-medium" style={{ color: 'var(--text-muted)' }}>Sinkronisasi data...</p>
       </div>
     )
   }
 
   return (
-    <main className="p-4 md:p-10 text-white bg-gray-950 min-h-screen relative">
+    <main className="min-h-screen relative" style={{ background: 'var(--bg)', color: 'var(--text-primary)' }}>
       <SharePnLCard 
         id="share-pnl-card"
         avgPrice={summary.total_btc > 0 ? (currency === 'IDR' ? summary.total_modal : summary.total_modal / usdRate) / summary.total_btc : 0}
@@ -170,31 +197,32 @@ export default function Dashboard() {
       />
       <RefreshProgressBar intervalMs={30000} key={refreshKey} />
 
-      {/* Header & SummaryCards tetap sama */}
-      <header className="flex justify-between items-center mb-10 border-b border-gray-800 pb-6">
-        <div className="flex flex-col justify-center">
-          <p className="text-[10px] text-gray-500 italic">Harga diperbarui pada: {lastUpdated}</p>
-          <h1 className="text-3xl font-black text-orange-500 tracking-tighter italic uppercase leading-none sm:leading-tight mt-0.5">
-            BTC<br className="sm:hidden" />
-            <span className="hidden sm:inline"> </span>Tracker
-          </h1>
-          <p className="text-xs text-gray-500 mt-0.5">{user?.email}</p>
-        </div>
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-3">
-            <div className="flex bg-gray-900 p-1 rounded-lg border border-gray-800">
+      <div className="p-4 md:p-10 max-w-7xl mx-auto">
+        {/* Header */}
+        <header className="flex justify-between items-center mb-10 pb-6" style={{ borderBottom: '1px solid var(--border)' }}>
+          <div className="flex flex-col justify-center">
+            <p className="text-[10px] italic" style={{ color: 'var(--text-muted)' }}>Harga diperbarui pada: {lastUpdated}</p>
+            <h1 className="text-3xl font-black tracking-tighter italic uppercase leading-none sm:leading-tight mt-0.5" style={{ color: 'var(--accent)' }}>
+              BTC<br className="sm:hidden" />
+              <span className="hidden sm:inline"> </span>Tracker
+            </h1>
+            <p className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>{user?.email}</p>
+          </div>
+          <div className="flex items-center gap-2">
+            {/* Currency Switcher */}
+            <div className="flex p-1 rounded-xl" style={{ background: 'var(--switcher-bg)', border: '1px solid var(--switcher-border)' }}>
               {(['IDR', 'USD'] as const).map((curr) => (
                 <button 
                   key={curr} 
                   onClick={() => setCurrency(curr)}
-                  className={`relative px-3 py-1 rounded-md text-xs font-bold transition-colors cursor-pointer ${
-                    currency === curr ? 'text-white' : 'text-gray-500 hover:text-gray-300'
-                  }`}
+                  className={`relative px-3 py-1.5 rounded-lg text-xs font-bold transition-colors cursor-pointer`}
+                  style={{ color: currency === curr ? '#ffffff' : 'var(--switcher-inactive)' }}
                 >
                   {currency === curr && (
                     <motion.div
                       layoutId="currency-active"
-                      className="absolute inset-0 bg-orange-500 rounded-md"
+                      className="absolute inset-0 rounded-lg"
+                      style={{ background: 'var(--accent)' }}
                       transition={{ type: "spring", bounce: 0.25, duration: 0.5 }}
                     />
                   )}
@@ -202,127 +230,147 @@ export default function Dashboard() {
                 </button>
               ))}
             </div>
-          </div>
-          <button
-            onClick={() => supabase.auth.signOut()}
-            title="Logout"
-            className="p-2 text-gray-400 hover:text-orange-400 hover:bg-gray-800 rounded-lg transition-all cursor-pointer"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
-              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-              <polyline points="16 17 21 12 16 7" />
-              <line x1="21" y1="12" x2="9" y2="12" />
-            </svg>
-          </button>
-        </div>
-      </header>
 
-      <SummaryCards
-        totalModal={summary.total_modal} 
-        totalBtc={summary.total_btc} 
-        currentPrice={currency === 'IDR' ? prices.idr : prices.usd}
-        usdRate={usdRate}
-        currency={currency} 
-        onShare={handleShare}
-      />
-
-      <div className="mt-8">
-        <div className="flex justify-end mb-4">
-          <div className="flex bg-gray-900 p-1 rounded-full border border-gray-700 text-[10px] font-semibold">
-            {(['table', 'bar', 'line'] as const).map((view) => (
-              <button
-                key={view}
-                type="button"
-                onClick={() => setTransactionView(view)}
-                className={`relative px-3 py-1 rounded-full transition-colors cursor-pointer ${
-                  transactionView === view
-                    ? 'text-white'
-                    : 'text-gray-400 hover:text-gray-200'
-                }`}
-              >
-                {transactionView === view && (
-                  <motion.div
-                    layoutId="view-active"
-                    className="absolute inset-0 bg-orange-500 rounded-full"
-                    transition={{ type: "spring", bounce: 0.25, duration: 0.5 }}
-                  />
-                )}
-                <span className="relative z-10">
-                  {view === 'table' ? 'Tabel' : view === 'bar' ? 'Bar Chart' : 'Line Chart'}
-                </span>
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={transactionView}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.2 }}
-          >
-            {transactionView === 'table' ? (
-              <TransactionTable
-                transactions={transactions}
-                onUpdate={() => fetchData(user!.id, currentPage)}
-                currentPage={currentPage}
-                totalCount={totalCount}
-                itemsPerPage={itemsPerPage}
-                onPageChange={handlePageChange}
-              />
-            ) : (
-              <TransactionCharts
-                mode={transactionView === 'bar' ? 'bar' : 'line'}
-                transactions={allTransactions}
-                currency={currency}
-                usdRate={usdRate}
-              />
-            )}
-          </motion.div>
-        </AnimatePresence>
-      </div>
-
-      <AnimatePresence>
-        {isAddTransactionOpen && (
-          <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
-          >
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.95, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              transition={{ type: "spring", damping: 25, stiffness: 400 }}
-              className="w-full max-w-xl"
+            {/* Theme Toggle */}
+            <button
+              onClick={(e) => toggleTheme(e)}
+              className="p-2.5 rounded-xl transition-all cursor-pointer"
+              style={{ 
+                color: 'var(--text-secondary)',
+                background: 'var(--bg-elevated)',
+                border: '1px solid var(--border)',
+              }}
+              title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
             >
-              <TransactionForm
-                userId={user!.id}
-                onSuccess={() => {
-                  fetchData(user!.id, currentPage)
-                  setIsAddTransactionOpen(false)
-                }}
-              />
-              <button
-                type="button"
-                onClick={() => setIsAddTransactionOpen(false)}
-                className="mt-4 w-full bg-gray-800 hover:bg-gray-700 text-gray-200 text-xs font-semibold py-2 px-4 rounded-lg border border-gray-700 transition-all shadow-lg cursor-pointer"
-              >
-                Tutup
-              </button>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+              {theme === 'dark' ? <SunIcon /> : <MoonIcon />}
+            </button>
 
-      {/* Floating Action Button */}
-      <FAB 
-        onClick={() => setIsAddTransactionOpen(true)} 
-        label="Tambah Transaksi" 
-      />
+            {/* Logout */}
+            <button
+              onClick={() => supabase.auth.signOut()}
+              title="Logout"
+              className="p-2.5 rounded-xl transition-all cursor-pointer"
+              style={{
+                color: 'var(--text-muted)',
+                background: 'var(--bg-elevated)',
+                border: '1px solid var(--border)',
+              }}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-[18px] h-[18px]">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                <polyline points="16 17 21 12 16 7" />
+                <line x1="21" y1="12" x2="9" y2="12" />
+              </svg>
+            </button>
+          </div>
+        </header>
+
+        <SummaryCards
+          totalModal={summary.total_modal} 
+          totalBtc={summary.total_btc} 
+          currentPrice={currency === 'IDR' ? prices.idr : prices.usd}
+          usdRate={usdRate}
+          currency={currency} 
+          onShare={handleShare}
+        />
+
+        <div className="mt-8">
+          <div className="flex justify-end mb-4">
+            <div className="flex p-1 rounded-full text-[10px] font-semibold" style={{ background: 'var(--switcher-bg)', border: '1px solid var(--switcher-border)' }}>
+              {(['table', 'bar', 'line'] as const).map((view) => (
+                <button
+                  key={view}
+                  type="button"
+                  onClick={() => setTransactionView(view)}
+                  className={`relative px-3 py-1 rounded-full transition-colors cursor-pointer`}
+                  style={{ color: transactionView === view ? '#ffffff' : 'var(--switcher-inactive)' }}
+                >
+                  {transactionView === view && (
+                    <motion.div
+                      layoutId="view-active"
+                      className="absolute inset-0 rounded-full"
+                      style={{ background: 'var(--accent)' }}
+                      transition={{ type: "spring", bounce: 0.25, duration: 0.5 }}
+                    />
+                  )}
+                  <span className="relative z-10">
+                    {view === 'table' ? 'Tabel' : view === 'bar' ? 'Bar Chart' : 'Line Chart'}
+                  </span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={transactionView}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.2 }}
+            >
+              {transactionView === 'table' ? (
+                <TransactionTable
+                  transactions={transactions}
+                  onUpdate={() => fetchData(user!.id, currentPage)}
+                  currentPage={currentPage}
+                  totalCount={totalCount}
+                  itemsPerPage={itemsPerPage}
+                  onPageChange={handlePageChange}
+                />
+              ) : (
+                <TransactionCharts
+                  mode={transactionView === 'bar' ? 'bar' : 'line'}
+                  transactions={allTransactions}
+                  currency={currency}
+                  usdRate={usdRate}
+                />
+              )}
+            </motion.div>
+          </AnimatePresence>
+        </div>
+
+        <AnimatePresence>
+          {isAddTransactionOpen && (
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-50 flex items-center justify-center p-4"
+              style={{ background: 'var(--bg-overlay)', backdropFilter: 'blur(8px)' }}
+            >
+              <motion.div 
+                initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                transition={{ type: "spring", damping: 25, stiffness: 400 }}
+                className="w-full max-w-xl"
+              >
+                <TransactionForm
+                  userId={user!.id}
+                  onSuccess={() => {
+                    fetchData(user!.id, currentPage)
+                    setIsAddTransactionOpen(false)
+                  }}
+                />
+                <button
+                  type="button"
+                  onClick={() => setIsAddTransactionOpen(false)}
+                  className="mt-3 w-full btn-secondary text-xs font-semibold py-2.5 px-4"
+                >
+                  Tutup
+                </button>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Floating Action Button */}
+        <FAB 
+          onClick={() => setIsAddTransactionOpen(true)} 
+          label="Tambah Transaksi" 
+        />
+      </div>
     </main>
   )
 }
