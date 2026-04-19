@@ -247,7 +247,7 @@ export default function Dashboard() {
 
             {/* Logout */}
             <button
-              onClick={() => supabase.auth.signOut()}
+              onClick={async () => { await supabase.auth.signOut(); router.push('/login') }}
               title="Logout"
               className="p-2.5 rounded-xl transition-all cursor-pointer"
               style={{
