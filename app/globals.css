@@ -96,12 +96,14 @@ html, body {
 }
 
 /* ===== VIEW TRANSITIONS ===== */
+/* Disable the default cross-fade — we run a custom clip-path animation via JS */
 ::view-transition-old(root),
 ::view-transition-new(root) {
   animation: none;
   mix-blend-mode: normal;
 }
 
+/* The new layer always expands on top for both light→dark and dark→light */
 ::view-transition-old(root) {
   z-index: 1;
 }
@@ -110,14 +112,6 @@ html, body {
   z-index: 9999;
 }
 
-/* Dark mode transition: new layer expands */
-html.dark::view-transition-old(root) {
-  z-index: 9999;
-}
-
-html.dark::view-transition-new(root) {
-  z-index: 1;
-}
 
 /* ===== CUSTOM SCROLLBAR ===== */
 ::-webkit-scrollbar {

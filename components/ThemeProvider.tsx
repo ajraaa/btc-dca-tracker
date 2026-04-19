@@ -1,6 +1,6 @@
 'use client'
 
-import { createContext, useContext, useEffect, useState, useCallback, useRef } from 'react'
+import { createContext, useContext, useEffect, useState, useCallback } from 'react'
 
 type Theme = 'light' | 'dark'
 
@@ -59,21 +59,20 @@ export default function ThemeProvider({ children }: { children: React.ReactNode 
       })
 
       transition.ready.then(() => {
-        const clipPath = [
-          `circle(0px at ${x}px ${y}px)`,
-          `circle(${endRadius}px at ${x}px ${y}px)`,
-        ]
-
+        // Always expand the NEW layer (::view-transition-new) for both directions.
+        // This avoids the blink that occurs at the end of shrinking the OLD layer.
         document.documentElement.animate(
           {
-            clipPath: theme === 'dark' ? clipPath : [...clipPath].reverse(),
+            clipPath: [
+              `circle(0px at ${x}px ${y}px)`,
+              `circle(${endRadius}px at ${x}px ${y}px)`,
+            ],
           },
           {
             duration: 500,
             easing: 'ease-in-out',
-            pseudoElement: theme === 'dark'
-              ? '::view-transition-new(root)'
-              : '::view-transition-old(root)',
+            fill: 'forwards',
+            pseudoElement: '::view-transition-new(root)',
           }
         )
       })
