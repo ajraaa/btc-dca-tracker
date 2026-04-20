@@ -8,10 +8,16 @@ Aplikasi sederhana untuk memantau investasi Bitcoin dengan metode *Dollar Cost A
 * **Dual Currency Mode**: Toggle tampilan seluruh dashboard antara **IDR** (Rupiah) dan **USD** (Dollar) untuk standar global.
 * **Complete CRUD**: Manajemen data transaksi penuh (Tambah, Lihat, Edit, dan Hapus).
 * **Authentication**: Sistem login menggunakan Supabase Auth.
-* **Pagination**: Pembatasan jumlah data per halaman agar tabel tetap rapi.
-* **Data Integrity**: Validasi input angka 0, negatif, atau tanggal masa depan. Baik di sisi Frontend maupun Database.
-* **Distribusi Modal**: Visualisasi komposisi investasi kamu (jumlah setiap transaksi) dalam grafik batang interaktif untuk melihat apakah portofolio DCA-mu seimbang.
-* **Titik Akumulasi**: Tampilkan riwayat pembelian di sepanjang garis waktu harga BTC, sehingga kamu bisa melihat kapan dan di mana kamu "mengakumulasi" koin.
+* **Premium Modern UI**: Desain antarmuka premium dan modern dengan dukungan kustomisasi sistem tema (Light/Dark mode) berbasis CSS variables.
+* **Smooth Animations & Interactions**: Interaksi antarmuka dinamis menggunakan *View Transition API* (untuk efek animasi transisi mulus) dan Framer Motion untuk *switcher* serta elemen UI lainnya.
+* **Share PnL**: Bagikan ringkasan performa investasi (Profit/Loss) ke dalam bentuk gambar secara instan (mendukung *native sharing* di mobile dan unduhan langsung di desktop).
+* **Floating Action Button (FAB)**: Tombol aksi cepat interaktif untuk menambah transaksi baru.
+* **Live Price Countdown Indicator**: Indikator bar visual yang selalu aktif untuk memantau waktu mundur pembaruan harga live BTC setiap 30 detik.
+* **Mobile Layout Optimized**: Pengalaman mobile yang ditingkatkan termasuk penyesuaian *theme-color* meta tag bagi Safari iOS, menghadirkan nuansa aplikasi *native*.
+* **Pagination**: Pembatasan jumlah data per halaman agar tabel tetap terorganisir.
+* **Data Integrity**: Validasi ketat input angka (mencegah nol/negatif) atau tanggal masa depan di sisi frontend maupun database.
+* **Distribusi Modal**: Visualisasi komposisi investasi (jumlah setiap transaksi) dalam grafik batang (*Bar Chart*) interaktif untuk mengamati tingkat distribusi asetmu.
+* **Titik Akumulasi**: Tampilkan riwayat pembelian di sepanjang garis waktu harga BTC (*Line Chart*), memudahkan kamu melihat titik masuk dari waktu ke waktu.
 
 ## 🛠️ Tech Stack
 
