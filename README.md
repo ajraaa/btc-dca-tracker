@@ -13,8 +13,6 @@ Aplikasi sederhana untuk memantau investasi Bitcoin dengan metode *Dollar Cost A
 * **Share PnL**: Bagikan ringkasan performa investasi (Profit/Loss) ke dalam bentuk gambar secara instan (mendukung *native sharing* di mobile dan unduhan langsung di desktop).
 * **Floating Action Button (FAB)**: Tombol aksi cepat interaktif untuk menambah transaksi baru.
 * **Live Price Countdown Indicator**: Indikator bar visual yang selalu aktif untuk memantau waktu mundur pembaruan harga live BTC setiap 30 detik.
-* **Mobile Layout Optimized**: Pengalaman mobile yang ditingkatkan termasuk penyesuaian *theme-color* meta tag bagi Safari iOS, menghadirkan nuansa aplikasi *native*.
-* **Pagination**: Pembatasan jumlah data per halaman agar tabel tetap terorganisir.
 * **Data Integrity**: Validasi ketat input angka (mencegah nol/negatif) atau tanggal masa depan di sisi frontend maupun database.
 * **Distribusi Modal**: Visualisasi komposisi investasi (jumlah setiap transaksi) dalam grafik batang (*Bar Chart*) interaktif untuk mengamati tingkat distribusi asetmu.
 * **Titik Akumulasi**: Tampilkan riwayat pembelian di sepanjang garis waktu harga BTC (*Line Chart*), memudahkan kamu melihat titik masuk dari waktu ke waktu.
