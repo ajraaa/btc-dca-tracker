@@ -30,7 +30,7 @@ Aplikasi sederhana untuk memantau investasi Bitcoin dengan metode *Dollar Cost A
 
 1.  **Clone repositori**:
     ```bash
-    git clone https://github.com/your-username/btc-dca-tracker.git
+    git clone https://github.com/ajraaa/btc-dca-tracker.git
     cd btc-dca-tracker
     ```
 
