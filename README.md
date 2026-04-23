@@ -47,7 +47,7 @@ Aplikasi sederhana untuk memantau investasi Bitcoin dengan metode *Dollar Cost A
     ```
 
 4.  **Setup Database**:
-    Jalankan query SQL yang ada di folder `/supabase/setup.sql` (jika kamu menyimpannya) untuk membuat tabel `transactions` dan view `dca_summary`.
+    Jalankan query SQL yang ada di folder `/supabase/setup.sql` untuk membuat tabel `transactions` dan view `dca_summary`.
 
 5.  **Jalankan aplikasi**:
     ```bash
