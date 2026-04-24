@@ -151,31 +151,29 @@ export default function SummaryCards({ totalModal, totalBtc, currentPrice, usdRa
             </button>
           )}
           <div className="text-sm sm:text-xl font-bold mt-1.5 flex flex-wrap items-baseline gap-x-2 gap-y-0">
-            {visible ? (
-              <>
+            <NumberFlow 
+              value={pnlPercentage} 
+              format={{ 
+                style: 'percent' as const, 
+                minimumFractionDigits: 2, 
+                maximumFractionDigits: 2,
+                signDisplay: 'always' as const
+              }} 
+              style={{ color: pnlPercentage >= 0 ? 'var(--green)' : 'var(--red)' }}
+            />
+            <div className="text-[10px] sm:text-xs font-medium flex items-center" style={{ color: 'var(--text-muted)' }}>
+              <span>(</span>
+              {visible ? (
                 <NumberFlow 
-                  value={pnlPercentage} 
-                  format={{ 
-                    style: 'percent' as const, 
-                    minimumFractionDigits: 2, 
-                    maximumFractionDigits: 2,
-                    signDisplay: 'always' as const
-                  }} 
-                  style={{ color: pnlPercentage >= 0 ? 'var(--green)' : 'var(--red)' }}
+                  value={pnlNominal} 
+                  format={{...formatOptions, signDisplay: 'always' as const}} 
+                  locales={locale}
                 />
-                <div className="text-[10px] sm:text-xs font-medium flex items-center" style={{ color: 'var(--text-muted)' }}>
-                  <span>(</span>
-                  <NumberFlow 
-                    value={pnlNominal} 
-                    format={{...formatOptions, signDisplay: 'always' as const}} 
-                    locales={locale}
-                  />
-                  <span>)</span>
-                </div>
-              </>
-            ) : (
-              <span style={{ color: 'var(--text-muted)' }}>{HIDDEN_VALUE}</span>
-            )}
+              ) : (
+                <span>{HIDDEN_VALUE}</span>
+              )}
+              <span>)</span>
+            </div>
           </div>
         </div>
       </div>
