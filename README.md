@@ -2,6 +2,10 @@
 
 Aplikasi sederhana untuk memantau investasi Bitcoin dengan metode *Dollar Cost Averaging* (DCA) dengan P/L real-time.
 
+<p align="center">
+  <img src="docs/screenshots/main-view.png" width="600" alt="BTC DCA Tracker Dashboard">
+</p>
+
 ## ✨ Fitur Utama
 
 * **Real-time PnL Tracking**: Pantau keuntungan/kerugian secara live yang di-update setiap 30 detik melalui integrasi API CoinGecko.
