@@ -21,6 +21,13 @@ Aplikasi sederhana untuk memantau investasi Bitcoin dengan metode *Dollar Cost A
 * **Distribusi Modal**: Visualisasi komposisi investasi (jumlah setiap transaksi) dalam grafik batang (*Bar Chart*) interaktif untuk mengamati tingkat distribusi asetmu.
 * **Titik Akumulasi**: Tampilkan riwayat pembelian di sepanjang garis waktu harga BTC (*Line Chart*), memudahkan kamu melihat titik masuk dari waktu ke waktu.
 
+## 🔮 Rencana Masa Depan (Roadmap)
+
+*   [ ] **Calendar View**: Visualisasi kalender untuk memantau konsistensi investasi bulanan/mingguan.
+*   [ ] **Crypto Market Widgets**: Widget kecil untuk hitung mundur *Bitcoin Halving* dan *Fear and Greed Index*.
+*   [ ] **Data Portability**: Fitur Ekspor & Impor data dalam format CSV/JSON.
+*   [ ] **DCA vs Lump Sum Simulator**: Perbandingan performa antara strategi DCA dengan pembelian sekaligus (*Lump Sum*).
+
 ## 🛠️ Tech Stack
 
 * **Framework**: [Next.js](https://nextjs.org/) (App Router)
