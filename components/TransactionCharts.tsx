@@ -259,7 +259,12 @@ export default function TransactionCharts({ transactions, mode, currency, usdRat
         <YAxis hide={true} domain={['auto', 'auto']} />
         <Tooltip content={<CustomTooltip />} />
         {averagePrice > 0 && (
-          <ReferenceLine y={averagePrice} stroke={chartText} strokeDasharray="3 3" />
+          <ReferenceLine 
+            y={averagePrice} 
+            stroke={chartText} 
+            strokeDasharray="3 3" 
+            label={{ position: 'insideTopLeft', value: 'Avg Price', fill: chartText, fontSize: 10 }}
+          />
         )}
         <Area type="monotone" dataKey="btcPrice" stroke={accent} strokeWidth={2} fillOpacity={1} fill="url(#colorBtc)" dot={false} />
         <Scatter dataKey="purchasePrice" fill="#fbbf24">
