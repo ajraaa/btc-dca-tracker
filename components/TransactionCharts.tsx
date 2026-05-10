@@ -12,6 +12,7 @@ import {
   CartesianGrid,
   Scatter,
   Cell,
+  ReferenceLine,
 } from 'recharts'
 import { lttb } from './utility/lttb'
 
@@ -58,7 +59,7 @@ function useCSSVar(varName: string, fallback: string = '') {
   return value
 }
 
-export default function TransactionCharts({ transactions, mode, currency }: Props) {
+export default function TransactionCharts({ transactions, mode, currency, usdRate }: Props) {
   const [btcHistory, setBtcHistory] = useState<BtcHistoryPoint[]>([])
   const [loadingHistory, setLoadingHistory] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
@@ -173,6 +174,15 @@ export default function TransactionCharts({ transactions, mode, currency }: Prop
     return downsampled.map(({ x, y, preserve, ...rest }) => rest)
   }, [mergedDataRaw])
 
+  const averagePrice = useMemo(() => {
+    if (!transactions.length) return 0
+    const totalFiat = transactions.reduce((sum, tx) => sum + tx.fiat_amount, 0)
+    const totalBtc = transactions.reduce((sum, tx) => sum + tx.btc_amount, 0)
+    if (totalBtc === 0) return 0
+    const avgIdr = totalFiat / totalBtc
+    return currency === 'IDR' ? avgIdr : avgIdr / usdRate
+  }, [transactions, currency, usdRate])
+
   const chartWidth = isMobile
     ? (mode === 'bar' 
         ? Math.max(containerWidth, barData.length * 60) 
@@ -248,6 +258,9 @@ export default function TransactionCharts({ transactions, mode, currency }: Prop
         <XAxis dataKey="dateLabel" tick={{ fontSize: 9, fill: '#fbbf24' }} minTickGap={30} axisLine={false} tickLine={false} />
         <YAxis hide={true} domain={['auto', 'auto']} />
         <Tooltip content={<CustomTooltip />} />
+        {averagePrice > 0 && (
+          <ReferenceLine y={averagePrice} stroke={chartText} strokeDasharray="3 3" />
+        )}
         <Area type="monotone" dataKey="btcPrice" stroke={accent} strokeWidth={2} fillOpacity={1} fill="url(#colorBtc)" dot={false} />
         <Scatter dataKey="purchasePrice" fill="#fbbf24">
           {mergedData.map((entry, index) => (
