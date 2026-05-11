@@ -100,12 +100,22 @@ export default function TransactionCharts({ transactions, mode, currency, usdRat
       setLoadingHistory(true)
       try {
         const firstDate = new Date(Math.min(...transactions.map(t => new Date(t.purchase_date).getTime())))
-        const days = Math.max(1, Math.ceil((Date.now() - firstDate.getTime()) / (24 * 60 * 60 * 1000)))
+        const rawDays = Math.max(1, Math.ceil((Date.now() - firstDate.getTime()) / (24 * 60 * 60 * 1000)))
+        
+        // Normalize days to improve cache hit rate and respect CoinGecko's 365-day public API limit
+        let days = 30
+        if (rawDays > 30 && rawDays <= 90) days = 90
+        else if (rawDays > 90) days = 365
+        
         const vsCurrency = currency.toLowerCase()
         
         const res = await fetch(`/api/history?vs_currency=${vsCurrency}&days=${days}`)
         const json = await res.json()
         
+        if (!res.ok || !json.prices || !Array.isArray(json.prices)) {
+          throw new Error(json.error || `API error: ${res.status}`)
+        }
+
         const uniquePrices = new Map<string, BtcHistoryPoint>()
         json.prices.forEach(([ts, price]: [number, number]) => {
           const isoDate = new Date(ts).toISOString().split('T')[0]
@@ -117,7 +127,32 @@ export default function TransactionCharts({ transactions, mode, currency, usdRat
             btcPrice: price
           })
         })
-        setBtcHistory(Array.from(uniquePrices.values()))
+
+        // Synthesize historical points for transactions older than the CoinGecko 365-day limit
+        let earliestFetchedTs = Infinity
+        for (const point of uniquePrices.values()) {
+            if (point.ts < earliestFetchedTs) earliestFetchedTs = point.ts
+        }
+
+        transactions.forEach(tx => {
+            const txTs = new Date(tx.purchase_date).getTime()
+            if (txTs < earliestFetchedTs - 86400000) { // Older than fetched data
+                const isoDate = new Date(txTs).toISOString().split('T')[0]
+                if (!uniquePrices.has(isoDate) && tx.btc_amount > 0) {
+                    const impliedPriceIdr = tx.fiat_amount / tx.btc_amount
+                    const impliedPrice = vsCurrency === 'idr' ? impliedPriceIdr : impliedPriceIdr / usdRate
+                    uniquePrices.set(isoDate, {
+                        ts: txTs,
+                        dateLabel: new Date(txTs).toLocaleDateString('id-ID', { day: '2-digit', month: 'short' }),
+                        isoDate,
+                        btcPrice: impliedPrice
+                    })
+                }
+            }
+        })
+
+        // Ensure chronological order
+        setBtcHistory(Array.from(uniquePrices.values()).sort((a, b) => a.ts - b.ts))
       } catch (err) {
         console.error('Gagal fetch harga:', err)
       } finally {
@@ -125,7 +160,7 @@ export default function TransactionCharts({ transactions, mode, currency, usdRat
       }
     }
     loadHistory()
-  }, [transactions, mode, currency])
+  }, [transactions, mode, currency, usdRate])
 
   // 2. Data khusus untuk Bar Chart (Urut berdasarkan tanggal)
   const barData = useMemo(() => {
