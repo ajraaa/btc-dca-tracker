@@ -117,15 +117,19 @@ export default function TransactionCharts({ transactions, mode, currency, usdRat
         }
 
         const uniquePrices = new Map<string, BtcHistoryPoint>()
+        const startTs = firstDate.getTime() - 86400000 // 1 day padding before first transaction
+        
         json.prices.forEach(([ts, price]: [number, number]) => {
-          const isoDate = new Date(ts).toISOString().split('T')[0]
-          // Menimpa nilai sebelumnya untuk tanggal yang sama agar tidak ada duplikasi data (menghindari double tooltip di hari yang sama)
-          uniquePrices.set(isoDate, {
-            ts,
-            dateLabel: new Date(ts).toLocaleDateString('id-ID', { day: '2-digit', month: 'short' }),
-            isoDate,
-            btcPrice: price
-          })
+          if (ts >= startTs) {
+            const isoDate = new Date(ts).toISOString().split('T')[0]
+            // Menimpa nilai sebelumnya untuk tanggal yang sama agar tidak ada duplikasi data (menghindari double tooltip di hari yang sama)
+            uniquePrices.set(isoDate, {
+              ts,
+              dateLabel: new Date(ts).toLocaleDateString('id-ID', { day: '2-digit', month: 'short' }),
+              isoDate,
+              btcPrice: price
+            })
+          }
         })
 
         // Synthesize historical points for transactions older than the CoinGecko 365-day limit
