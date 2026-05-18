@@ -16,6 +16,15 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "BTC DCA Tracker",
   description: "Track your DCA.",
+  icons: {
+    icon: "/icon.svg",
+    apple: "/icon.svg",
+  },
+  appleWebApp: {
+    title: "BTC Tracker",
+    statusBarStyle: "default",
+    capable: true,
+  },
 };
 
 export const viewport: Viewport = {
