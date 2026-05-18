@@ -281,7 +281,10 @@ export default function Dashboard() {
           {/* Bottom Row: Sync Time & Email */}
           <div className="flex items-center justify-between w-full mt-2 sm:mt-3 pt-2" style={{ borderTop: '1px solid var(--border)' }}>
             <div className="flex items-center gap-1.5 opacity-80">
-              <span className="w-1.5 h-1.5 rounded-full" style={{ background: '#22c55e' }}></span>
+              <span className="relative flex h-1.5 w-1.5">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75" style={{ background: '#22c55e' }}></span>
+                <span className="relative inline-flex rounded-full h-1.5 w-1.5" style={{ background: '#22c55e' }}></span>
+              </span>
               <p className="text-[10px] sm:text-[11px] leading-none" style={{ color: 'var(--text-muted)' }}>Price updated: {lastUpdated}</p>
             </div>
             <p className="text-[10px] sm:text-[11px] leading-none opacity-80" style={{ color: 'var(--text-muted)' }}>{user?.email}</p>
