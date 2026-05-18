@@ -199,7 +199,7 @@ export default function Dashboard() {
 
       <div className="p-4 md:p-10 max-w-7xl mx-auto">
         {/* Header */}
-        <header className="flex flex-col gap-3 sm:gap-4 mb-6 sm:mb-10 pb-4 sm:pb-6" style={{ borderBottom: '1px solid var(--border)' }}>
+        <header className="flex flex-col mb-4 sm:mb-8 pb-2 sm:pb-3" style={{ borderBottom: '1px solid var(--border)' }}>
           {/* Top Row: Logo, Title & Actions */}
           <div className="flex items-center justify-between w-full">
             {/* Left: Logo & Title */}
@@ -243,7 +243,7 @@ export default function Dashboard() {
               {/* Theme Toggle */}
               <button
                 onClick={(e) => toggleTheme(e)}
-                className="p-1.5 sm:p-2.5 rounded-xl transition-all cursor-pointer"
+                className="p-1.5 sm:p-2.5 rounded-xl transition-all cursor-pointer flex items-center justify-center"
                 style={{ 
                   color: 'var(--text-secondary)',
                   background: 'var(--bg-elevated)',
@@ -251,36 +251,40 @@ export default function Dashboard() {
                 }}
                 title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
               >
-                {theme === 'dark' ? <SunIcon className="w-3.5 h-3.5 sm:w-5 sm:h-5" /> : <MoonIcon className="w-3.5 h-3.5 sm:w-5 sm:h-5" />}
+                <span className="scale-75 sm:scale-100 flex items-center justify-center">
+                  {theme === 'dark' ? <SunIcon /> : <MoonIcon />}
+                </span>
               </button>
 
               {/* Logout */}
               <button
                 onClick={async () => { await supabase.auth.signOut(); router.push('/login') }}
                 title="Logout"
-                className="p-1.5 sm:p-2.5 rounded-xl transition-all cursor-pointer"
+                className="p-1.5 sm:p-2.5 rounded-xl transition-all cursor-pointer flex items-center justify-center"
                 style={{
                   color: 'var(--text-muted)',
                   background: 'var(--bg-elevated)',
                   border: '1px solid var(--border)',
                 }}
               >
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5 sm:w-[18px] sm:h-[18px]">
-                  <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-                  <polyline points="16 17 21 12 16 7" />
-                  <line x1="21" y1="12" x2="9" y2="12" />
-                </svg>
+                <span className="scale-75 sm:scale-100 flex items-center justify-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="18" height="18">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                    <polyline points="16 17 21 12 16 7" />
+                    <line x1="21" y1="12" x2="9" y2="12" />
+                  </svg>
+                </span>
               </button>
             </div>
           </div>
 
           {/* Bottom Row: Sync Time & Email */}
-          <div className="flex items-center justify-between w-full pt-3 sm:pt-4" style={{ borderTop: '1px solid var(--border)' }}>
-            <div className="flex items-center gap-2 opacity-80">
+          <div className="flex items-center justify-between w-full mt-2 sm:mt-3 pt-2" style={{ borderTop: '1px solid var(--border)' }}>
+            <div className="flex items-center gap-1.5 opacity-80">
               <span className="w-1.5 h-1.5 rounded-full" style={{ background: '#22c55e' }}></span>
-              <p className="text-[10px] sm:text-[11px]" style={{ color: 'var(--text-muted)' }}>Price updated: {lastUpdated}</p>
+              <p className="text-[10px] sm:text-[11px] leading-none" style={{ color: 'var(--text-muted)' }}>Price updated: {lastUpdated}</p>
             </div>
-            <p className="text-[10px] sm:text-[11px] opacity-80" style={{ color: 'var(--text-muted)' }}>{user?.email}</p>
+            <p className="text-[10px] sm:text-[11px] leading-none opacity-80" style={{ color: 'var(--text-muted)' }}>{user?.email}</p>
           </div>
         </header>
 
