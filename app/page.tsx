@@ -201,7 +201,7 @@ export default function Dashboard() {
         {/* Header */}
         <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-10 pb-6" style={{ borderBottom: '1px solid var(--border)' }}>
           <div className="flex flex-col justify-center">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1">
               <div className="flex-shrink-0" style={{ transform: 'skewX(-12deg)', color: 'var(--accent)' }}>
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Bitcoin growth icon" className="w-8 h-8 sm:w-9 sm:h-9">
                   <g transform="translate(256 256) scale(1.263158) translate(-232.000 -197.500)" fill="currentColor" fillRule="evenodd">
@@ -213,7 +213,7 @@ export default function Dashboard() {
                 BTC Tracker
               </h1>
             </div>
-            <div className="flex items-center gap-2 mt-2 opacity-80">
+            <div className="flex items-center gap-2 mt-1 opacity-80">
               <p className="text-[11px]" style={{ color: 'var(--text-muted)' }}>{user?.email}</p>
               <span className="w-1 h-1 rounded-full opacity-30" style={{ background: 'var(--text-muted)' }}></span>
               <p className="text-[10px]" style={{ color: 'var(--text-muted)' }}>Price updated: {lastUpdated}</p>

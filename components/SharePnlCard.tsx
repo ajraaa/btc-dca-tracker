@@ -50,7 +50,7 @@ export default function SharePnLCard({
         {/* Header */}
         <div className="flex justify-between items-start z-10">
           <div className="flex flex-col">
-            <div className="flex items-center gap-1.5">
+            <div className="flex items-center gap-1">
               <div className="flex-shrink-0 text-orange-500" style={{ transform: 'skewX(-12deg)' }}>
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Bitcoin growth icon" className="w-7 h-7">
                   <g transform="translate(256 256) scale(1.263158) translate(-232.000 -197.500)" fill="currentColor" fillRule="evenodd">
@@ -60,7 +60,7 @@ export default function SharePnLCard({
               </div>
               <h1 className="text-2xl font-bold text-orange-500 italic tracking-tight leading-none">BTC TRACKER</h1>
             </div>
-            <p className="text-[10px] text-gray-500 tracking-widest uppercase mt-1">Investment Performance</p>
+            <p className="text-[10px] text-gray-500 tracking-widest uppercase mt-0.5">Investment Performance</p>
           </div>
           <div className="text-right">
             <p className="text-xs text-gray-400 font-mono">{new Date().toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })}</p>
