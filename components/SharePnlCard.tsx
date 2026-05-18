@@ -38,6 +38,11 @@ export default function SharePnLCard({
         <div className="absolute -top-20 -right-20 w-64 h-64 bg-orange-500/10 rounded-full blur-[80px]" />
         <div className="absolute -bottom-20 -left-20 w-64 h-64 bg-orange-600/10 rounded-full blur-[80px]" />
 
+        {/* Watermark Icon */}
+        <div className="absolute inset-0 flex items-center justify-center opacity-5 pointer-events-none">
+          <img src="/icon.svg" alt="Watermark" className="w-80 h-80" />
+        </div>
+
         {/* Header */}
         <div className="flex justify-between items-start z-10">
           <div>

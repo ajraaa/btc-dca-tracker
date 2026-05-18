@@ -202,10 +202,13 @@ export default function Dashboard() {
         <header className="flex justify-between items-center mb-10 pb-6" style={{ borderBottom: '1px solid var(--border)' }}>
           <div className="flex flex-col justify-center">
             <p className="text-[10px] italic" style={{ color: 'var(--text-muted)' }}>Harga diperbarui pada: {lastUpdated}</p>
-            <h1 className="text-3xl font-black tracking-tighter italic uppercase leading-none sm:leading-tight mt-0.5" style={{ color: 'var(--accent)' }}>
-              BTC<br className="sm:hidden" />
-              <span className="hidden sm:inline"> </span>Tracker
-            </h1>
+            <div className="flex items-center gap-3 mt-0.5">
+              <img src="/icon.svg" alt="BTC Tracker Logo" className="w-8 h-8 sm:w-10 sm:h-10" />
+              <h1 className="text-3xl font-black tracking-tighter italic uppercase leading-none sm:leading-tight" style={{ color: 'var(--accent)' }}>
+                BTC<br className="sm:hidden" />
+                <span className="hidden sm:inline"> </span>Tracker
+              </h1>
+            </div>
             <p className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>{user?.email}</p>
           </div>
           <div className="flex items-center gap-2">
