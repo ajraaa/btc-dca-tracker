@@ -199,54 +199,51 @@ export default function Dashboard() {
 
       <div className="p-4 md:p-10 max-w-7xl mx-auto">
         {/* Header */}
-        <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 sm:gap-6 mb-6 sm:mb-10 pb-4 sm:pb-6" style={{ borderBottom: '1px solid var(--border)' }}>
-          <div className="flex flex-col justify-center">
-            <div className="flex items-center gap-1.5 sm:gap-1">
+        <header className="flex flex-col gap-3 sm:gap-4 mb-6 sm:mb-10 pb-4 sm:pb-6" style={{ borderBottom: '1px solid var(--border)' }}>
+          {/* Top Row: Logo, Title & Actions */}
+          <div className="flex items-center justify-between w-full">
+            {/* Left: Logo & Title */}
+            <div className="flex items-center gap-1.5 sm:gap-1 flex-shrink-0">
               <div className="flex-shrink-0" style={{ transform: 'skewX(-12deg)', color: 'var(--accent)' }}>
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Bitcoin growth icon" className="w-7 h-7 sm:w-9 sm:h-9">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Bitcoin growth icon" className="w-6 h-6 sm:w-9 sm:h-9">
                   <g transform="translate(256 256) scale(1.263158) translate(-232.000 -197.500)" fill="currentColor" fillRule="evenodd">
                     <path d="M 364 73 L 362 72 L 302 87 L 314 100 L 312 105 L 225 200 L 222 200 L 184 163 L 101 253 L 100 312 L 140 313 L 142 316 L 143 349 L 172 349 L 173 314 L 193 313 L 195 315 L 195 348 L 225 349 L 226 314 L 251 312 L 268 306 L 279 299 L 289 289 L 299 273 L 304 257 L 304 235 L 300 221 L 293 208 L 287 201 L 285 201 L 265 222 L 272 236 L 272 256 L 266 267 L 258 275 L 251 279 L 244 281 L 133 281 L 133 265 L 184 209 L 186 209 L 223 246 L 225 246 L 337 124 L 340 124 L 353 136 Z M 225 46 L 195 46 L 195 80 L 191 82 L 175 82 L 173 80 L 172 46 L 142 46 L 142 79 L 139 82 L 100 82 L 101 233 L 132 199 L 132 115 L 134 113 L 230 113 L 240 116 L 247 120 L 253 126 L 258 134 L 259 139 L 261 140 L 283 116 L 283 113 L 280 108 L 263 92 L 246 84 L 228 82 L 226 80 Z"/>
                   </g>
                 </svg>
               </div>
-              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight italic uppercase leading-none" style={{ color: 'var(--accent)' }}>
+              <h1 className="text-[1.1rem] sm:text-3xl font-bold tracking-tight italic uppercase leading-none" style={{ color: 'var(--accent)' }}>
                 BTC Tracker
               </h1>
             </div>
-            <div className="flex items-center gap-1.5 sm:gap-2 mt-1 sm:mt-1 flex-wrap opacity-80">
-              <p className="text-[10px] sm:text-[11px]" style={{ color: 'var(--text-muted)' }}>{user?.email}</p>
-              <span className="w-1 h-1 rounded-full opacity-30" style={{ background: 'var(--text-muted)' }}></span>
-              <p className="text-[9px] sm:text-[10px]" style={{ color: 'var(--text-muted)' }}>Price updated: {lastUpdated}</p>
-            </div>
-          </div>
-          <div className="flex items-center justify-between w-full sm:w-auto gap-2 pt-2 sm:pt-0">
-            {/* Currency Switcher */}
-            <div className="flex p-1 rounded-xl" style={{ background: 'var(--switcher-bg)', border: '1px solid var(--switcher-border)' }}>
-              {(['IDR', 'USD'] as const).map((curr) => (
-                <button 
-                  key={curr} 
-                  onClick={() => setCurrency(curr)}
-                  className={`relative px-3 py-1.5 rounded-lg text-xs font-bold transition-colors cursor-pointer`}
-                  style={{ color: currency === curr ? '#ffffff' : 'var(--switcher-inactive)' }}
-                >
-                  {currency === curr && (
-                    <motion.div
-                      layoutId="currency-active"
-                      className="absolute inset-0 rounded-lg"
-                      style={{ background: 'var(--accent)' }}
-                      transition={{ type: "spring", bounce: 0.25, duration: 0.5 }}
-                    />
-                  )}
-                  <span className="relative z-10">{curr}</span>
-                </button>
-              ))}
-            </div>
 
-            <div className="flex items-center gap-2">
+            {/* Right: Actions */}
+            <div className="flex items-center gap-1.5 sm:gap-2">
+              {/* Currency Switcher */}
+              <div className="flex p-1 rounded-xl" style={{ background: 'var(--switcher-bg)', border: '1px solid var(--switcher-border)' }}>
+                {(['IDR', 'USD'] as const).map((curr) => (
+                  <button 
+                    key={curr} 
+                    onClick={() => setCurrency(curr)}
+                    className={`relative px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg text-[10px] sm:text-xs font-bold transition-colors cursor-pointer`}
+                    style={{ color: currency === curr ? '#ffffff' : 'var(--switcher-inactive)' }}
+                  >
+                    {currency === curr && (
+                      <motion.div
+                        layoutId="currency-active"
+                        className="absolute inset-0 rounded-lg"
+                        style={{ background: 'var(--accent)' }}
+                        transition={{ type: "spring", bounce: 0.25, duration: 0.5 }}
+                      />
+                    )}
+                    <span className="relative z-10">{curr}</span>
+                  </button>
+                ))}
+              </div>
+
               {/* Theme Toggle */}
               <button
                 onClick={(e) => toggleTheme(e)}
-                className="p-2.5 rounded-xl transition-all cursor-pointer"
+                className="p-1.5 sm:p-2.5 rounded-xl transition-all cursor-pointer"
                 style={{ 
                   color: 'var(--text-secondary)',
                   background: 'var(--bg-elevated)',
@@ -254,27 +251,36 @@ export default function Dashboard() {
                 }}
                 title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
               >
-                {theme === 'dark' ? <SunIcon /> : <MoonIcon />}
+                {theme === 'dark' ? <SunIcon className="w-3.5 h-3.5 sm:w-5 sm:h-5" /> : <MoonIcon className="w-3.5 h-3.5 sm:w-5 sm:h-5" />}
               </button>
 
               {/* Logout */}
               <button
                 onClick={async () => { await supabase.auth.signOut(); router.push('/login') }}
                 title="Logout"
-                className="p-2.5 rounded-xl transition-all cursor-pointer"
+                className="p-1.5 sm:p-2.5 rounded-xl transition-all cursor-pointer"
                 style={{
                   color: 'var(--text-muted)',
                   background: 'var(--bg-elevated)',
                   border: '1px solid var(--border)',
                 }}
               >
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-[18px] h-[18px]">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5 sm:w-[18px] sm:h-[18px]">
                   <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
                   <polyline points="16 17 21 12 16 7" />
                   <line x1="21" y1="12" x2="9" y2="12" />
                 </svg>
               </button>
             </div>
+          </div>
+
+          {/* Bottom Row: Sync Time & Email */}
+          <div className="flex items-center justify-between w-full pt-3 sm:pt-4" style={{ borderTop: '1px solid var(--border)' }}>
+            <div className="flex items-center gap-2 opacity-80">
+              <span className="w-1.5 h-1.5 rounded-full" style={{ background: '#22c55e' }}></span>
+              <p className="text-[10px] sm:text-[11px]" style={{ color: 'var(--text-muted)' }}>Price updated: {lastUpdated}</p>
+            </div>
+            <p className="text-[10px] sm:text-[11px] opacity-80" style={{ color: 'var(--text-muted)' }}>{user?.email}</p>
           </div>
         </header>
 
