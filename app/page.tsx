@@ -203,7 +203,7 @@ export default function Dashboard() {
           {/* Top Row: Logo, Title & Actions */}
           <div className="flex items-center justify-between w-full">
             {/* Left: Logo & Title */}
-            <div className="flex items-center gap-1.5 sm:gap-1 flex-shrink-0">
+            <div className="flex items-center gap-1 sm:gap-1 flex-shrink-0">
               <div className="flex-shrink-0" style={{ transform: 'skewX(-12deg)', color: 'var(--accent)' }}>
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Bitcoin growth icon" className="w-6 h-6 sm:w-9 sm:h-9">
                   <g transform="translate(256 256) scale(1.263158) translate(-232.000 -197.500)" fill="currentColor" fillRule="evenodd">
