@@ -20,6 +20,7 @@ Aplikasi sederhana untuk memantau investasi Bitcoin dengan metode *Dollar Cost A
 * **Data Integrity**: Validasi ketat input angka (mencegah nol/negatif) atau tanggal masa depan di sisi frontend maupun database.
 * **Distribusi Modal**: Visualisasi komposisi investasi (jumlah setiap transaksi) dalam grafik batang (*Bar Chart*) interaktif untuk mengamati tingkat distribusi asetmu.
 * **Titik Akumulasi**: Tampilkan riwayat pembelian di sepanjang garis waktu harga BTC (*Line Chart*), memudahkan kamu melihat titik masuk dari waktu ke waktu.
+* **PWA (Progressive Web App) Ready**: Aplikasi dapat diinstal langsung pada layar beranda (*Home Screen*) perangkat Android, iOS, maupun Desktop. Dilengkapi dengan manifest khusus, ikon kustom, mode *standalone* yang meminimalkan antarmuka browser, serta warna *status bar* adaptif (*theme color*) yang otomatis menyesuaikan dengan preferensi mode terang/gelap (*light/dark mode*).
 
 ## 🔮 Rencana Masa Depan (Roadmap)
 
