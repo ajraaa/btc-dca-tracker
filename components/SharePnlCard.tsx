@@ -49,9 +49,18 @@ export default function SharePnLCard({
 
         {/* Header */}
         <div className="flex justify-between items-start z-10">
-          <div>
-            <h1 className="text-2xl font-black text-orange-500 italic tracking-tighter">BTC TRACKER</h1>
-            <p className="text-[10px] text-gray-500 tracking-widest uppercase mt-1">Investment Performance</p>
+          <div className="flex items-center gap-1">
+            <div className="flex-shrink-0 text-orange-500">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Bitcoin growth icon" className="w-9 h-9">
+                <g transform="translate(256 256) scale(1.263158) translate(-232.000 -197.500)" fill="currentColor" fillRule="evenodd">
+                  <path d="M 364 73 L 362 72 L 302 87 L 314 100 L 312 105 L 225 200 L 222 200 L 184 163 L 101 253 L 100 312 L 140 313 L 142 316 L 143 349 L 172 349 L 173 314 L 193 313 L 195 315 L 195 348 L 225 349 L 226 314 L 251 312 L 268 306 L 279 299 L 289 289 L 299 273 L 304 257 L 304 235 L 300 221 L 293 208 L 287 201 L 285 201 L 265 222 L 272 236 L 272 256 L 266 267 L 258 275 L 251 279 L 244 281 L 133 281 L 133 265 L 184 209 L 186 209 L 223 246 L 225 246 L 337 124 L 340 124 L 353 136 Z M 225 46 L 195 46 L 195 80 L 191 82 L 175 82 L 173 80 L 172 46 L 142 46 L 142 79 L 139 82 L 100 82 L 101 233 L 132 199 L 132 115 L 134 113 L 230 113 L 240 116 L 247 120 L 253 126 L 258 134 L 259 139 L 261 140 L 283 116 L 283 113 L 280 108 L 263 92 L 246 84 L 228 82 L 226 80 Z"/>
+                </g>
+              </svg>
+            </div>
+            <div className="flex flex-col justify-between h-9">
+              <h1 className="text-2xl font-black text-orange-500 italic tracking-tighter leading-none">BTC TRACKER</h1>
+              <p className="text-[10px] text-gray-500 tracking-widest uppercase leading-none">Investment Performance</p>
+            </div>
           </div>
           <div className="text-right">
             <p className="text-xs text-gray-400 font-mono">{new Date().toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })}</p>
