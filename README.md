@@ -3,7 +3,7 @@
 Aplikasi sederhana untuk memantau investasi Bitcoin dengan metode *Dollar Cost Averaging* (DCA) dengan P/L real-time.
 
 <p align="center">
-  <img src="docs/screenshots/main-view.png" width="600" alt="BTC DCA Tracker Dashboard">
+  <img src="docs/screenshots/main-view.png?v=2" width="600" alt="BTC DCA Tracker Dashboard">
 </p>
 
 ## ✨ Fitur Utama
