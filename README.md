@@ -1,33 +1,33 @@
 # 🚀 BTC DCA Tracker
 
-Aplikasi sederhana untuk memantau investasi Bitcoin dengan metode *Dollar Cost Averaging* (DCA) dengan P/L real-time.
+A simple application for monitoring Bitcoin investments using the *Dollar Cost Averaging* (DCA) method with real-time P/L.
 
 <p align="center">
   <img src="docs/screenshots/main-view.png?v=2" width="600" alt="BTC DCA Tracker Dashboard">
 </p>
 
-## ✨ Fitur Utama
+## ✨ Key Features
 
-* **Real-time PnL Tracking**: Pantau keuntungan/kerugian secara live yang di-update setiap 30 detik melalui integrasi API CoinGecko.
-* **Dual Currency Mode**: Toggle tampilan seluruh dashboard antara **IDR** (Rupiah) dan **USD** (Dollar) untuk standar global.
-* **Complete CRUD**: Manajemen data transaksi penuh (Tambah, Lihat, Edit, dan Hapus).
-* **Authentication**: Sistem login menggunakan Supabase Auth.
-* **Premium Modern UI**: Desain antarmuka premium dan modern dengan dukungan kustomisasi sistem tema (Light/Dark mode) berbasis CSS variables.
-* **Smooth Animations & Interactions**: Interaksi antarmuka dinamis menggunakan *View Transition API* (untuk efek animasi transisi mulus) dan Framer Motion untuk *switcher* serta elemen UI lainnya.
-* **Share PnL**: Bagikan ringkasan performa investasi (Profit/Loss) ke dalam bentuk gambar secara instan (mendukung *native sharing* di mobile dan unduhan langsung di desktop).
-* **Floating Action Button (FAB)**: Tombol aksi cepat interaktif untuk menambah transaksi baru.
-* **Live Price Countdown Indicator**: Indikator bar visual yang selalu aktif untuk memantau waktu mundur pembaruan harga live BTC setiap 30 detik.
-* **Data Integrity**: Validasi ketat input angka (mencegah nol/negatif) atau tanggal masa depan di sisi frontend maupun database.
-* **Distribusi Modal**: Visualisasi komposisi investasi (jumlah setiap transaksi) dalam grafik batang (*Bar Chart*) interaktif untuk mengamati tingkat distribusi asetmu.
-* **Titik Akumulasi**: Tampilkan riwayat pembelian di sepanjang garis waktu harga BTC (*Line Chart*), memudahkan kamu melihat titik masuk dari waktu ke waktu.
-* **PWA (Progressive Web App) Ready**: Aplikasi dapat diinstal langsung pada layar beranda (*Home Screen*) perangkat Android, iOS, maupun Desktop. Dilengkapi dengan manifest khusus, ikon kustom, mode *standalone* yang meminimalkan antarmuka browser, serta warna *status bar* adaptif (*theme color*) yang otomatis menyesuaikan dengan preferensi mode terang/gelap (*light/dark mode*).
+* **Real-time PnL Tracking**: Monitor profit/loss live, updated every 30 seconds via CoinGecko API integration.
+* **Dual Currency Mode**: Toggle the entire dashboard display between **IDR** (Rupiah) and **USD** (Dollar) for global standards.
+* **Complete CRUD**: Full transaction data management (Create, Read, Update, and Delete).
+* **Authentication**: Login system using Supabase Auth.
+* **Premium Modern UI**: Premium and modern interface design with theme system customization support (Light/Dark mode) based on CSS variables.
+* **Smooth Animations & Interactions**: Dynamic UI interactions using the *View Transition API* (for smooth animated transitions) and Framer Motion for switchers and other UI elements.
+* **Share PnL**: Share investment performance summaries (Profit/Loss) as images instantly (supports *native sharing* on mobile and direct downloads on desktop).
+* **Floating Action Button (FAB)**: Interactive quick-action button for adding new transactions.
+* **Live Price Countdown Indicator**: An always-active visual bar indicator to track the countdown for live BTC price updates every 30 seconds.
+* **Data Integrity**: Strict validation of numeric input (preventing zero/negative values) and future dates on both the frontend and database side.
+* **Capital Distribution**: Visualize investment composition (the amount of each transaction) in an interactive *Bar Chart* to observe your asset distribution levels.
+* **Accumulation Points**: Display purchase history along the BTC price timeline (*Line Chart*), making it easy to see entry points over time.
+* **PWA (Progressive Web App) Ready**: The app can be installed directly on the *Home Screen* of Android, iOS, and Desktop devices. Equipped with a custom manifest, custom icons, *standalone* mode that minimizes the browser interface, as well as adaptive *status bar* colors (*theme color*) that automatically adjust to light/dark mode preferences.
 
-## 🔮 Rencana Masa Depan (Roadmap)
+## 🔮 Roadmap
 
-*   [ ] **Calendar View**: Visualisasi kalender untuk memantau konsistensi investasi bulanan/mingguan.
-*   [ ] **Crypto Market Widgets**: Widget kecil untuk hitung mundur *Bitcoin Halving* dan *Fear and Greed Index*.
-*   [ ] **Data Portability**: Fitur Ekspor & Impor data dalam format CSV/JSON.
-*   [ ] **DCA vs Lump Sum Simulator**: Perbandingan performa antara strategi DCA dengan pembelian sekaligus (*Lump Sum*).
+*   [ ] **Calendar View**: Calendar visualization to monitor monthly/weekly investment consistency.
+*   [ ] **Crypto Market Widgets**: Small widgets for *Bitcoin Halving* countdown and *Fear and Greed Index*.
+*   [ ] **Data Portability**: Data Export & Import feature in CSV/JSON format.
+*   [ ] **DCA vs Lump Sum Simulator**: Performance comparison between the DCA strategy and one-time purchase (*Lump Sum*).
 
 ## 🛠️ Tech Stack
 
@@ -38,30 +38,30 @@ Aplikasi sederhana untuk memantau investasi Bitcoin dengan metode *Dollar Cost A
 * **Language**: TypeScript
 
 
-## 🚀 Memulai (Setup Lokal)
+## 🚀 Getting Started (Local Setup)
 
-1.  **Clone repositori**:
+1.  **Clone the repository**:
     ```bash
     git clone https://github.com/ajraaa/btc-dca-tracker.git
     cd btc-dca-tracker
     ```
 
-2.  **Instalasi dependensi**:
+2.  **Install dependencies**:
     ```bash
     npm install
     ```
 
-3.  **Konfigurasi Environment Variables**:
-    Buat file `.env.local` dan masukkan kredensial Supabase kamu:
+3.  **Configure Environment Variables**:
+    Create a `.env.local` file and enter your Supabase credentials:
     ```env
     NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
     NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
     ```
 
-4.  **Setup Database**:
-    Jalankan query SQL yang ada di folder `/supabase/setup.sql` untuk membuat tabel `transactions` dan view `dca_summary`.
+4.  **Database Setup**:
+    Run the SQL query in the `/supabase/setup.sql` folder to create the `transactions` table and the `dca_summary` view.
 
-5.  **Jalankan aplikasi**:
+5.  **Run the application**:
     ```bash
     npm run dev
     ```
