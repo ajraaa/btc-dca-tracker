@@ -36,8 +36,22 @@ function EyeOffIcon() {
   )
 }
 
+const STORAGE_KEY = 'summaryCards_visible'
+
 export default function SummaryCards({ totalModal, totalBtc, currentPrice, usdRate, currency, onShare }: SummaryProps) {
-  const [visible, setVisible] = useState(true)
+  const [visible, setVisible] = useState(() => {
+    if (typeof window === 'undefined') return true
+    const stored = localStorage.getItem(STORAGE_KEY)
+    return stored !== null ? stored === 'true' : true
+  })
+
+  const toggleVisible = () => {
+    setVisible(v => {
+      const next = !v
+      localStorage.setItem(STORAGE_KEY, String(next))
+      return next
+    })
+  }
 
   // 1. Hitung Modal sesuai mata uang
   const displayModal = currency === 'IDR' ? totalModal : totalModal / usdRate
@@ -67,7 +81,7 @@ export default function SummaryCards({ totalModal, totalBtc, currentPrice, usdRa
       {/* Toggle visibility button */}
       <div className="flex justify-end mb-3">
         <button
-          onClick={() => setVisible(v => !v)}
+          onClick={toggleVisible}
           className="flex items-center gap-1.5 transition-colors text-xs px-2.5 py-1.5 rounded-lg cursor-pointer"
           style={{ color: 'var(--text-muted)', background: 'transparent' }}
           title={visible ? 'Sembunyikan nilai' : 'Tampilkan nilai'}
