@@ -65,3 +65,8 @@ A simple application for monitoring Bitcoin investments using the *Dollar Cost A
     ```bash
     npm run dev
     ```
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
