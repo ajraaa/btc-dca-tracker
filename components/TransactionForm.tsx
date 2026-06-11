@@ -23,7 +23,8 @@ export default function TransactionForm({ userId, onSuccess }: TransactionFormPr
     setErrorMsg(null)
     setLoading(true)
 
-    const fiat = parseFloat(fiatAmount)
+    const cleanFiat = fiatAmount.replace(/\./g, '')
+    const fiat = parseFloat(cleanFiat) || 0
     const btc = parseFloat(btcAmount)
     const feeVal = parseFloat(fee)
 
@@ -56,7 +57,7 @@ export default function TransactionForm({ userId, onSuccess }: TransactionFormPr
       .insert([
         {
           user_id: userId,
-          fiat_amount: parseFloat(fiatAmount),
+          fiat_amount: parseFloat(fiatAmount.replace(/\./g, '')),
           btc_amount: parseFloat(btcAmount),
           fee: parseFloat(fee),
           purchase_date: new Date(date).toISOString(),
@@ -140,10 +141,18 @@ export default function TransactionForm({ userId, onSuccess }: TransactionFormPr
         <div>
           <label className="block text-xs font-semibold uppercase mb-1.5" style={{ color: 'var(--text-muted)' }}>Total Modal (IDR)</label>
           <input
-            type="number"
-            min="1" // Browser-level validation
+            type="text"
             value={fiatAmount}
-            onChange={(e) => setFiatAmount(e.target.value)}
+            onChange={(e) => {
+              const val = e.target.value
+              const clean = val.replace(/\D/g, '')
+              if (!clean) {
+                setFiatAmount('')
+                return
+              }
+              const formatted = new Intl.NumberFormat('id-ID').format(parseInt(clean, 10))
+              setFiatAmount(formatted)
+            }}
             placeholder="0"
             className="input-field"
             required
