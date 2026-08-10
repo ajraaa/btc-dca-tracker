@@ -42,6 +42,23 @@ interface BtcHistoryPoint {
   btcPrice: number
 }
 
+type TimeRange = '1M' | '3M' | '6M' | '1Y' | 'ALL'
+
+const TIME_RANGE_OPTIONS: { value: TimeRange; label: string }[] = [
+  { value: '1M', label: '1M' },
+  { value: '3M', label: '3M' },
+  { value: '6M', label: '6M' },
+  { value: '1Y', label: '1Y' },
+  { value: 'ALL', label: 'All' },
+]
+
+const RANGE_MS: Record<Exclude<TimeRange, 'ALL'>, number> = {
+  '1M': 30 * 86400000,
+  '3M': 90 * 86400000,
+  '6M': 180 * 86400000,
+  '1Y': 365 * 86400000,
+}
+
 // Helper hook to read CSS variables at runtime
 function useCSSVar(varName: string, fallback: string = '') {
   const [value, setValue] = useState(fallback)
@@ -65,6 +82,7 @@ export default function TransactionCharts({ transactions, mode, currency, usdRat
   const containerRef = useRef<HTMLDivElement>(null)
   const [containerWidth, setContainerWidth] = useState(800)
   const [isMobile, setIsMobile] = useState(false)
+  const [timeRange, setTimeRange] = useState<TimeRange>('1Y')
 
   // Theme-aware colors
   const chartGrid = useCSSVar('--chart-grid', '#1e2433')
@@ -196,11 +214,18 @@ export default function TransactionCharts({ transactions, mode, currency, usdRat
     }))
   }, [btcHistory, transactions])
 
-  // 4. LTTB down-sampling – keeps purchase points, reduces market-only noise
-  const mergedData = useMemo(() => {
-    if (!mergedDataRaw.length) return []
+  // 4. Filter by selected time range
+  const filteredData = useMemo(() => {
+    if (timeRange === 'ALL' || !mergedDataRaw.length) return mergedDataRaw
+    const cutoff = Date.now() - RANGE_MS[timeRange]
+    return mergedDataRaw.filter(p => p.ts >= cutoff)
+  }, [mergedDataRaw, timeRange])
 
-    const withLTTBFields = mergedDataRaw.map(p => ({
+  // 5. LTTB down-sampling – keeps purchase points, reduces market-only noise
+  const mergedData = useMemo(() => {
+    if (!filteredData.length) return []
+
+    const withLTTBFields = filteredData.map(p => ({
       ...p,
       x: p.ts,
       y: p.btcPrice,
@@ -211,7 +236,7 @@ export default function TransactionCharts({ transactions, mode, currency, usdRat
 
     // Strip the helper fields before handing to Recharts
     return downsampled.map(({ x, y, preserve, ...rest }) => rest)
-  }, [mergedDataRaw])
+  }, [filteredData])
 
   const averagePrice = useMemo(() => {
     if (!transactions.length) return 0
@@ -328,6 +353,25 @@ export default function TransactionCharts({ transactions, mode, currency, usdRat
               : 'Titik kuning menunjukkan eksekusi DCA kamu terhadap harga pasar'}
           </p>
         </div>
+        {mode === 'line' && (
+          <div className="flex gap-1" style={{ flexShrink: 0 }}>
+            {TIME_RANGE_OPTIONS.map(opt => (
+              <button
+                key={opt.value}
+                onClick={() => setTimeRange(opt.value)}
+                className="text-[10px] font-semibold px-2.5 py-1 rounded-full transition-all duration-200"
+                style={{
+                  backgroundColor: timeRange === opt.value ? accent : 'transparent',
+                  color: timeRange === opt.value ? '#fff' : chartText,
+                  border: timeRange === opt.value ? 'none' : `1px solid ${chartGrid}`,
+                  cursor: 'pointer',
+                }}
+              >
+                {opt.label}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
       <div className={`h-72 w-full ${isMobile ? 'overflow-x-auto overflow-y-hidden' : 'overflow-hidden'}`} ref={containerRef} style={{ scrollbarWidth: 'thin' }}>
